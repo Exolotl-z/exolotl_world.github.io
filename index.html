@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="个人社交网站 - 展示个人作品、博客和数据面板">
+    <title>我的个人网站</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/home.css">
+    <!-- Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <i class="fas fa-code"></i>
+                    <span>我的空间</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link active">首页</a></li>
+                <li><a href="blog.html" class="nav-link">博客</a></li>
+                <li><a href="ideas.html" class="nav-link">奇思妙想</a></li>
+                <li><a href="dashboard.html" class="nav-link">数据面板</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主页内容 -->
+    <main class="main-content">
+        <!-- 英雄区域 -->
+        <section class="hero-section">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            欢迎来到 <span class="highlight">exolotl</span>的宇宙
+                        </h1>
+                        <p class="hero-subtitle">
+                            全栈开发不了工程师 | 爱好一切者 | 有一份工作
+                        </p>
+                        <p class="hero-description">
+                            专注于在活着的时候一直思考
+                        </p>
+                        <div class="hero-buttons">
+                            <a href="#projects" class="btn btn-primary">
+                                <i class="fas fa-rocket"></i>
+                                好玩是第一生产力
+                            </a>
+                            <a href="#contact" class="btn btn-secondary">
+                                <i class="fas fa-envelope"></i>
+                                联系我
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <div class="avatar-container">
+                            <div class="avatar-circle"></div>
+                            <i class="fas fa-user-astronaut avatar-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 技能标签云 -->
+        <section class="skills-section" id="skills">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-code"></i>
+                    研究方向
+                </h2>
+                <div class="skills-cloud">
+                    <span class="skill-tag" data-level="expert">自我的睡眠</span>
+                    <span class="skill-tag" data-level="expert">明日方舟世界史</span>
+                    <span class="skill-tag" data-level="expert">阿瓦隆和血染博弈论</span>
+                    <span class="skill-tag" data-level="advanced">本格推理进化论</span>
+                    <span class="skill-tag" data-level="expert">五音不全和音乐创作的辩证关系</span>
+                    <span class="skill-tag" data-level="advanced">二次元文化的深入理解</span>
+                    <span class="skill-tag" data-level="advanced">如何三个键完成编程</span>
+                    <span class="skill-tag" data-level="intermediate">哲学到steam库</span>
+                    <span class="skill-tag" data-level="intermediate">帕金森也能3D建模</span>
+                    <span class="skill-tag" data-level="advanced">合成生物学</span>
+                    <span class="skill-tag" data-level="expert">类人语义和情绪理解</span>
+                    <span class="skill-tag" data-level="advanced">蛋白质分析和生成</span>
+                    <span class="skill-tag" data-level="expert">神经科学</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 奇思妙想卡片 -->
+        <section class="projects-section" id="projects">
+            <div class="container">
+                <div class="ideas-header-home">
+                    <h2 class="section-title">
+                        <i class="fas fa-lightbulb"></i>
+                        奇思妙想
+                    </h2>
+                    <a href="ideas.html" class="view-more-btn">
+                        <span>查看更多</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="ideas-grid-home" id="pinnedIdeasGrid">
+                    <!-- 置顶的想法将通过JavaScript动态加载 -->
+                </div>
+                <div class="empty-ideas" id="emptyIdeas" style="display: none;">
+                    <p>还没有置顶的想法，<a href="ideas.html">去添加一个</a>！</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 联系我 -->
+        <section class="contact-section" id="contact">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-paper-plane"></i>
+                    联系方式
+                </h2>
+                <div class="contact-content">
+                    <p class="contact-intro">
+                        如果你对我的研究方向感兴趣，欢迎通过以下方式联系我
+                    </p>
+                    <div class="social-links">
+                        <a href="https://github.com/Exolotl-z" target="_blank" class="social-link" aria-label="GitHub">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub</span>
+                        </a>
+                        <a href="https://www.xiaohongshu.com/user/profile/63d541810000000026010ae7" target="_blank" class="social-link" aria-label="小红书">
+                            <i class="fas fa-book"></i>
+                            <span>小红书</span>
+                        </a>
+                        <a href="#" class="social-link" aria-label="微信" onclick="alert('微信号：z18792156620')">
+                            <i class="fab fa-weixin"></i>
+                            <span>微信</span>
+                        </a>
+                        <a href="mailto:Eoxlotl@outlook.com" class="social-link" aria-label="Email">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>万物皆虚，万物皆允</p>
+            <p>登楼撤梯，见月忽指</p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop" aria-label="回到顶部">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="js/main.js"></script>
+    <script src="js/home.js"></script>
+</body>
+</html>

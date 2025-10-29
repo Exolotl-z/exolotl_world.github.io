@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="奇思妙想 - 记录灵感与创意">
+    <title>奇思妙想 - 我的个人网站</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/ideas.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <i class="fas fa-code"></i>
+                    <span>我的空间</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="blog.html" class="nav-link">博客</a></li>
+                <li><a href="ideas.html" class="nav-link active">奇思妙想</a></li>
+                <li><a href="dashboard.html" class="nav-link">数据面板</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="main-content">
+        <!-- 页面头部 -->
+        <section class="ideas-header">
+            <div class="container">
+                <h1 class="page-title">
+                    <i class="fas fa-lightbulb"></i>
+                    奇思妙想
+                </h1>
+                <p class="page-subtitle">记录每一个灵感瞬间</p>
+            </div>
+        </section>
+
+        <!-- 操作区域 -->
+        <section class="ideas-actions">
+            <div class="container">
+                <button class="add-idea-btn" id="addIdeaBtn">
+                    <i class="fas fa-plus"></i>
+                    添加新想法
+                </button>
+            </div>
+        </section>
+
+        <!-- 想法卡片网格 -->
+        <section class="ideas-section">
+            <div class="container">
+                <div class="ideas-grid" id="ideasGrid">
+                    <!-- 卡片将由JavaScript动态生成 -->
+                </div>
+
+                <!-- 空状态 -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <i class="fas fa-lightbulb"></i>
+                    <p>还没有想法，点击上方按钮添加第一个吧！</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 添加/编辑想法模态框 -->
+    <div class="modal" id="ideaModal">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加新想法</h2>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="ideaTitle">标题</label>
+                    <input type="text" id="ideaTitle" class="form-input" placeholder="给你的想法起个名字...">
+                </div>
+                <div class="form-group">
+                    <label for="ideaContent">内容</label>
+                    <textarea id="ideaContent" class="form-textarea" rows="6" placeholder="详细描述你的想法..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ideaTags">标签</label>
+                    <input type="text" id="ideaTags" class="form-input" placeholder="用逗号分隔多个标签，如：技术,创意,灵感">
+                </div>
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="ideaPinned">
+                        <span>置顶到首页</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>万物皆虚，万物皆允</p>
+            <p>登楼撤梯，见月忽指</p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop" aria-label="回到顶部">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="js/main.js"></script>
+    <script src="js/ideas.js"></script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="个人博客 - 分享技术文章和学习心得">
+    <title>博客 - 我的个人网站</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/blog.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <i class="fas fa-code"></i>
+                    <span>我的空间</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="blog.html" class="nav-link active">博客</a></li>
+                <li><a href="ideas.html" class="nav-link">奇思妙想</a></li>
+                <li><a href="dashboard.html" class="nav-link">数据面板</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <!-- 博客主内容 -->
+    <main class="main-content">
+        <!-- 博客头部 -->
+        <section class="blog-header">
+            <div class="container">
+                <h1 class="page-title">
+                    <i class="fas fa-blog"></i>
+                    我的博客
+                </h1>
+                <p class="page-subtitle">分享技术见解，记录学习历程</p>
+            </div>
+        </section>
+
+        <div class="blog-container">
+            <!-- 侧边栏 -->
+            <aside class="blog-sidebar">
+                <!-- 搜索框 -->
+                <div class="sidebar-section search-box">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="search-input" 
+                            placeholder="搜索文章..."
+                            aria-label="搜索文章"
+                        >
+                    </div>
+                </div>
+
+                <!-- 分类筛选 -->
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-folder"></i>
+                        文章分类
+                    </h3>
+                    <div class="category-list">
+                        <button class="category-item active" data-category="all">
+                            <i class="fas fa-th"></i>
+                            <span>全部</span>
+                            <span class="category-count">12</span>
+                        </button>
+                        <button class="category-item" data-category="frontend">
+                            <i class="fas fa-palette"></i>
+                            <span>前端开发</span>
+                            <span class="category-count">5</span>
+                        </button>
+                        <button class="category-item" data-category="backend">
+                            <i class="fas fa-server"></i>
+                            <span>后端开发</span>
+                            <span class="category-count">3</span>
+                        </button>
+                        <button class="category-item" data-category="design">
+                            <i class="fas fa-paint-brush"></i>
+                            <span>UI/UX设计</span>
+                            <span class="category-count">2</span>
+                        </button>
+                        <button class="category-item" data-category="tutorial">
+                            <i class="fas fa-book"></i>
+                            <span>教程</span>
+                            <span class="category-count">2</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 热门标签 -->
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-tags"></i>
+                        热门标签
+                    </h3>
+                    <div class="tags-cloud">
+                        <span class="tag-item">JavaScript</span>
+                        <span class="tag-item">React</span>
+                        <span class="tag-item">CSS</span>
+                        <span class="tag-item">TypeScript</span>
+                        <span class="tag-item">Node.js</span>
+                        <span class="tag-item">Vue</span>
+                        <span class="tag-item">Python</span>
+                        <span class="tag-item">UI设计</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 文章列表 -->
+            <div class="blog-main">
+                <div class="articles-grid" id="articlesGrid">
+                    <!-- 文章卡片 1 -->
+                    <article class="article-card" data-category="frontend">
+                        <div class="article-header">
+                            <div class="article-meta">
+                                <span class="article-category">
+                                    <i class="fas fa-palette"></i>
+                                    前端开发
+                                </span>
+                                <span class="article-date">
+                                    <i class="far fa-calendar"></i>
+                                    2025-10-25
+                                </span>
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <h2 class="article-title">
+                                <a href="article.html?id=1">深入理解CSS Grid布局</a>
+                            </h2>
+                            <p class="article-excerpt">
+                                CSS Grid是一个强大的二维布局系统，让我们能够更轻松地创建复杂的网页布局。本文将深入探讨Grid的核心概念和实用技巧...
+                            </p>
+                            <div class="article-tags">
+                                <span class="tag">CSS</span>
+                                <span class="tag">Grid</span>
+                                <span class="tag">布局</span>
+                            </div>
+                        </div>
+                        <div class="article-footer">
+                            <div class="article-stats">
+                                <span><i class="far fa-eye"></i> 1.2k</span>
+                                <span><i class="far fa-heart"></i> 89</span>
+                                <span><i class="far fa-comment"></i> 23</span>
+                            </div>
+                            <a href="article.html?id=1" class="read-more">
+                                阅读更多
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- 文章卡片 2 -->
+                    <article class="article-card" data-category="frontend">
+                        <div class="article-header">
+                            <div class="article-meta">
+                                <span class="article-category">
+                                    <i class="fas fa-palette"></i>
+                                    前端开发
+                                </span>
+                                <span class="article-date">
+                                    <i class="far fa-calendar"></i>
+                                    2025-10-22
+                                </span>
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <h2 class="article-title">
+                                <a href="article.html?id=2">React Hooks最佳实践</a>
+                            </h2>
+                            <p class="article-excerpt">
+                                React Hooks改变了我们编写组件的方式。本文总结了在实际项目中使用Hooks的最佳实践和常见陷阱...
+                            </p>
+                            <div class="article-tags">
+                                <span class="tag">React</span>
+                                <span class="tag">Hooks</span>
+                                <span class="tag">JavaScript</span>
+                            </div>
+                        </div>
+                        <div class="article-footer">
+                            <div class="article-stats">
+                                <span><i class="far fa-eye"></i> 2.3k</span>
+                                <span><i class="far fa-heart"></i> 156</span>
+                                <span><i class="far fa-comment"></i> 45</span>
+                            </div>
+                            <a href="article.html?id=2" class="read-more">
+                                阅读更多
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- 文章卡片 3 -->
+                    <article class="article-card" data-category="backend">
+                        <div class="article-header">
+                            <div class="article-meta">
+                                <span class="article-category">
+                                    <i class="fas fa-server"></i>
+                                    后端开发
+                                </span>
+                                <span class="article-date">
+                                    <i class="far fa-calendar"></i>
+                                    2025-10-20
+                                </span>
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <h2 class="article-title">
+                                <a href="article.html?id=3">Node.js性能优化指南</a>
+                            </h2>
+                            <p class="article-excerpt">
+                                Node.js应用的性能优化是一个系统工程。从事件循环到内存管理，本文分享实用的优化技巧...
+                            </p>
+                            <div class="article-tags">
+                                <span class="tag">Node.js</span>
+                                <span class="tag">性能优化</span>
+                                <span class="tag">后端</span>
+                            </div>
+                        </div>
+                        <div class="article-footer">
+                            <div class="article-stats">
+                                <span><i class="far fa-eye"></i> 1.8k</span>
+                                <span><i class="far fa-heart"></i> 124</span>
+                                <span><i class="far fa-comment"></i> 32</span>
+                            </div>
+                            <a href="article.html?id=3" class="read-more">
+                                阅读更多
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- 文章卡片 4 -->
+                    <article class="article-card" data-category="design">
+                        <div class="article-header">
+                            <div class="article-meta">
+                                <span class="article-category">
+                                    <i class="fas fa-paint-brush"></i>
+                                    UI/UX设计
+                                </span>
+                                <span class="article-date">
+                                    <i class="far fa-calendar"></i>
+                                    2025-10-18
+                                </span>
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <h2 class="article-title">
+                                <a href="article.html?id=4">现代UI设计趋势与原则</a>
+                            </h2>
+                            <p class="article-excerpt">
+                                探索2025年UI设计的最新趋势，从微交互到暗黑模式，了解如何创建引人入胜的用户界面...
+                            </p>
+                            <div class="article-tags">
+                                <span class="tag">UI设计</span>
+                                <span class="tag">UX</span>
+                                <span class="tag">设计趋势</span>
+                            </div>
+                        </div>
+                        <div class="article-footer">
+                            <div class="article-stats">
+                                <span><i class="far fa-eye"></i> 980</span>
+                                <span><i class="far fa-heart"></i> 67</span>
+                                <span><i class="far fa-comment"></i> 18</span>
+                            </div>
+                            <a href="article.html?id=4" class="read-more">
+                                阅读更多
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- 文章卡片 5 -->
+                    <article class="article-card" data-category="tutorial">
+                        <div class="article-header">
+                            <div class="article-meta">
+                                <span class="article-category">
+                                    <i class="fas fa-book"></i>
+                                    教程
+                                </span>
+                                <span class="article-date">
+                                    <i class="far fa-calendar"></i>
+                                    2025-10-15
+                                </span>
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <h2 class="article-title">
+                                <a href="article.html?id=5">TypeScript从零到一</a>
+                            </h2>
+                            <p class="article-excerpt">
+                                TypeScript为JavaScript带来了强类型系统。这个教程将带你从基础到进阶，掌握TypeScript的核心特性...
+                            </p>
+                            <div class="article-tags">
+                                <span class="tag">TypeScript</span>
+                                <span class="tag">教程</span>
+                                <span class="tag">JavaScript</span>
+                            </div>
+                        </div>
+                        <div class="article-footer">
+                            <div class="article-stats">
+                                <span><i class="far fa-eye"></i> 3.1k</span>
+                                <span><i class="far fa-heart"></i> 210</span>
+                                <span><i class="far fa-comment"></i> 56</span>
+                            </div>
+                            <a href="article.html?id=5" class="read-more">
+                                阅读更多
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- 文章卡片 6 -->
+                    <article class="article-card" data-category="frontend">
+                        <div class="article-header">
+                            <div class="article-meta">
+                                <span class="article-category">
+                                    <i class="fas fa-palette"></i>
+                                    前端开发
+                                </span>
+                                <span class="article-date">
+                                    <i class="far fa-calendar"></i>
+                                    2025-10-12
+                                </span>
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <h2 class="article-title">
+                                <a href="article.html?id=6">响应式设计完全指南</a>
+                            </h2>
+                            <p class="article-excerpt">
+                                在多设备时代，响应式设计是必备技能。本文详细讲解响应式设计的核心概念、最佳实践和常用技巧...
+                            </p>
+                            <div class="article-tags">
+                                <span class="tag">响应式</span>
+                                <span class="tag">CSS</span>
+                                <span class="tag">移动端</span>
+                            </div>
+                        </div>
+                        <div class="article-footer">
+                            <div class="article-stats">
+                                <span><i class="far fa-eye"></i> 1.5k</span>
+                                <span><i class="far fa-heart"></i> 98</span>
+                                <span><i class="far fa-comment"></i> 28</span>
+                            </div>
+                            <a href="article.html?id=6" class="read-more">
+                                阅读更多
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- 空状态 -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <p>没有找到相关文章</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>万物皆虚，万物皆允</p>
+            <p>登楼撤梯，见月忽指</p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop" aria-label="回到顶部">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="js/main.js"></script>
+    <script src="js/blog.js"></script>
+</body>
+</html>
