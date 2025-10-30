@@ -262,19 +262,11 @@ new Chart(ctx, {
 });
 ```
 
-## 🤝 贡献
-
-欢迎提交Issue和Pull Request！
 
 ## 📄 许可证
 
 本项目采用 [MIT](LICENSE) 许可证
 
-## 👤 作者
-
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
-- Website: https://yourwebsite.com
 
 ## 🙏 致谢
 
@@ -283,10 +275,7 @@ new Chart(ctx, {
 - [Highlight.js](https://highlightjs.org/) - 代码高亮
 - [Google Fonts](https://fonts.google.com/) - 字体
 
-## 📸 截图
-
-_可以添加网站截图展示_
-
 ---
 
 ⭐ 如果这个项目对你有帮助，请给个Star！
+
