@@ -1,0 +1,524 @@
+/* ===== 首页样式 ===== */
+
+/* 英雄区域 - 极简风格 */
+.hero-section {
+    padding: 8rem 0 6rem;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hero-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.hero-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.hero-text {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.hero-title .highlight {
+    color: var(--text-primary);
+    font-weight: 400;
+    border-bottom: 2px solid var(--text-primary);
+    padding-bottom: 2px;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.hero-description {
+    font-size: 1.125rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: slideInRight 0.8s ease-out;
+}
+
+.avatar-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    border: 2px solid var(--text-primary);
+    overflow: hidden;
+}
+
+/* 真实头像图片 */
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* 如果图片加载失败，隐藏图片显示占位符 */
+.avatar-img:not([src]),
+.avatar-img[src=""],
+.avatar-img[src*="avatar.jpg"]:not([src]) {
+    display: none;
+}
+
+/* 默认占位符 */
+.avatar-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+/* 当图片不存在时显示占位符 */
+.avatar-container:not(:has(.avatar-img[src*="images/"])) .avatar-placeholder,
+.avatar-img[src=""] + .avatar-placeholder {
+    opacity: 1;
+}
+
+.avatar-icon {
+    font-size: 8rem;
+    color: var(--text-primary);
+}
+
+/* 技能标签云 - 极简风格 */
+.skills-section {
+    padding: 5rem 0;
+    background: var(--bg-secondary);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.skills-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.skill-tag {
+    padding: 0.625rem 1.25rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    font-weight: 400;
+    font-size: 0.9375rem;
+    transition: all var(--transition-base);
+    cursor: pointer;
+    animation: fadeIn 0.6s ease-out;
+    animation-fill-mode: both;
+    letter-spacing: 0.02em;
+}
+
+.skill-tag:nth-child(1) { animation-delay: 0.1s; }
+.skill-tag:nth-child(2) { animation-delay: 0.2s; }
+.skill-tag:nth-child(3) { animation-delay: 0.3s; }
+.skill-tag:nth-child(4) { animation-delay: 0.4s; }
+.skill-tag:nth-child(5) { animation-delay: 0.5s; }
+.skill-tag:nth-child(6) { animation-delay: 0.6s; }
+.skill-tag:nth-child(7) { animation-delay: 0.7s; }
+.skill-tag:nth-child(8) { animation-delay: 0.8s; }
+.skill-tag:nth-child(9) { animation-delay: 0.9s; }
+.skill-tag:nth-child(10) { animation-delay: 1.0s; }
+.skill-tag:nth-child(11) { animation-delay: 1.1s; }
+.skill-tag:nth-child(12) { animation-delay: 1.2s; }
+
+.skill-tag[data-level="expert"] {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    border-color: var(--text-primary);
+}
+
+.skill-tag[data-level="advanced"] {
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    border-color: var(--text-secondary);
+}
+
+.skill-tag[data-level="intermediate"] {
+    color: var(--text-light);
+    background: var(--bg-primary);
+    border-color: var(--text-light);
+}
+
+.skill-tag:hover {
+    transform: translateY(-2px);
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border-color: var(--text-primary);
+}
+
+/* 奇思妙想区域 - 极简风格 */
+.projects-section {
+    padding: 5rem 0;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ideas-header-home {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.view-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.5rem;
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    transition: all var(--transition-base);
+    letter-spacing: 0.02em;
+}
+
+.view-more-btn:hover {
+    background: var(--text-secondary);
+    gap: 0.75rem;
+}
+
+.ideas-grid-home {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.idea-card-home {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    transition: all var(--transition-base);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.idea-card-home:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--text-light);
+}
+
+.idea-card-home .idea-title {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+}
+
+.idea-card-home .idea-content {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 0.9375rem;
+    margin-bottom: 1rem;
+    font-weight: 300;
+}
+
+.idea-card-home .idea-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.idea-card-home .idea-tag {
+    padding: 0.25rem 0.75rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.03em;
+}
+
+.empty-ideas {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-ideas a {
+    color: var(--text-primary);
+    text-decoration: underline;
+    transition: opacity var(--transition-fast);
+}
+
+.empty-ideas a:hover {
+    opacity: 0.7;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.project-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-md);
+    animation: fadeIn 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.project-card:nth-child(1) { animation-delay: 0.2s; }
+.project-card:nth-child(2) { animation-delay: 0.4s; }
+.project-card:nth-child(3) { animation-delay: 0.6s; }
+
+.project-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-xl);
+}
+
+.project-image {
+    height: 200px;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.project-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(0,0,0,0.1) 100%);
+}
+
+.project-icon {
+    font-size: 4rem;
+    color: white;
+    z-index: 1;
+}
+
+.project-content {
+    padding: 1.5rem;
+}
+
+.project-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.project-description {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tag {
+    padding: 0.25rem 0.75rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.project-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.project-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.project-link:hover {
+    color: var(--primary-dark);
+    transform: translateX(3px);
+}
+
+.project-footer {
+    padding: 1rem 1.5rem;
+    background: var(--bg-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+}
+
+/* 联系我 - 极简风格 */
+.contact-section {
+    padding: 5rem 0;
+    background: var(--bg-secondary);
+}
+
+.contact-intro {
+    text-align: center;
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.social-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1.5rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all var(--transition-base);
+    min-width: 120px;
+    font-weight: 400;
+}
+
+.social-link i {
+    font-size: 2rem;
+    transition: all var(--transition-base);
+}
+
+.social-link:hover {
+    transform: translateY(-3px);
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border-color: var(--text-primary);
+}
+
+.social-link:hover i {
+    transform: scale(1.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 968px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+    }
+
+    .avatar-container {
+        width: 250px;
+        height: 250px;
+    }
+
+    .avatar-icon {
+        font-size: 6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 3rem 0;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .social-links {
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.125rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .avatar-container {
+        width: 200px;
+        height: 200px;
+    }
+
+    .avatar-icon {
+        font-size: 5rem;
+    }
+}

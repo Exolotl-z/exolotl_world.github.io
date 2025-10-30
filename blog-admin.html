@@ -104,13 +104,14 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="articleCategory">分类</label>
-                        <select id="articleCategory" class="form-input">
-                            <option value="frontend">前端开发</option>
-                            <option value="backend">后端开发</option>
-                            <option value="design">UI/UX设计</option>
-                            <option value="tutorial">教程</option>
-                            <option value="other">其他</option>
-                        </select>
+                        <div class="input-with-add">
+                            <select id="articleCategory" class="form-input">
+                                <!-- 分类将由JavaScript动态生成 -->
+                            </select>
+                            <button type="button" class="add-btn" id="addCategoryBtn" title="添加新分类">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="articleDate">发布日期</label>
@@ -119,7 +120,13 @@
                 </div>
                 <div class="form-group">
                     <label for="articleTags">标签（用逗号分隔）</label>
-                    <input type="text" id="articleTags" class="form-input" placeholder="JavaScript, React, CSS">
+                    <div class="tags-input-container">
+                        <div class="selected-tags" id="selectedTags"></div>
+                        <input type="text" id="articleTags" class="form-input tags-input" placeholder="输入标签名称，回车添加">
+                    </div>
+                    <div class="suggested-tags" id="suggestedTags">
+                        <!-- 常用标签将由JavaScript动态生成 -->
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="articleExcerpt">摘要</label>

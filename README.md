@@ -183,13 +183,6 @@ git push -u origin main
 - **Highlight.js** - 代码高亮
 - **Marked.js** - Markdown解析（文章详情页）
 
-## 📱 浏览器支持
-
-- Chrome (推荐)
-- Firefox
-- Safari
-- Edge
-- Opera
 
 最低要求：支持ES6的现代浏览器
 
@@ -275,7 +268,7 @@ new Chart(ctx, {
 - [Highlight.js](https://highlightjs.org/) - 代码高亮
 - [Google Fonts](https://fonts.google.com/) - 字体
 
+
 ---
 
 ⭐ 如果这个项目对你有帮助，请给个Star！
-
