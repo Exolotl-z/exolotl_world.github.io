@@ -36,48 +36,51 @@
             </header>
 
             <div class="dashboard-grid">
-                <section class="dashboard-card calendar-card">
+                <!-- 日历和TODO融合卡片 -->
+                <section class="dashboard-card calendar-todo-card">
                     <div class="card-header">
-                        <h2 class="card-title"><i class="far fa-calendar-alt"></i> 日历</h2>
-                        <div class="calendar-controls">
-                            <button class="view-mode-btn active" data-mode="month">月</button>
-                            <button class="view-mode-btn" data-mode="week">周</button>
-                            <button class="view-mode-btn" data-mode="day">日</button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="calendar-header">
+                        <h2 class="card-title"><i class="far fa-calendar-check"></i> 日历任务</h2>
+                        <div class="calendar-nav">
                             <button class="calendar-nav-btn" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
                             <h3 class="current-month" id="currentMonth">2025年10月</h3>
                             <button class="calendar-nav-btn" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
                         </div>
-                        <div class="calendar-weekdays">
-                            <div class="weekday">日</div><div class="weekday">一</div><div class="weekday">二</div>
-                            <div class="weekday">三</div><div class="weekday">四</div><div class="weekday">五</div><div class="weekday">六</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="calendar-section">
+                            <div class="calendar-weekdays">
+                                <div class="weekday">日</div><div class="weekday">一</div><div class="weekday">二</div>
+                                <div class="weekday">三</div><div class="weekday">四</div><div class="weekday">五</div><div class="weekday">六</div>
+                            </div>
+                            <div class="calendar-grid" id="calendarGrid"></div>
                         </div>
-                        <div class="calendar-grid" id="calendarGrid"></div>
                     </div>
                 </section>
 
+                <!-- TODO列表卡片 -->
                 <section class="dashboard-card todo-card">
                     <div class="card-header">
-                        <h2 class="card-title"><i class="fas fa-tasks"></i> 待办事项</h2>
+                        <h2 class="card-title">
+                            <i class="fas fa-tasks"></i> 
+                            <span id="selectedDateTitle">全部任务</span>
+                        </h2>
                         <div class="todo-stats">
-                            <span><span class="stat-value" id="completedCount">5</span> / <span class="stat-value" id="totalCount">8</span></span>
+                            <span><span class="stat-value" id="completedCount">0</span> / <span class="stat-value" id="totalCount">0</span></span>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="add-todo-form">
                             <input type="text" id="todoInput" class="todo-input" placeholder="添加新任务...">
                             <div class="priority-selector">
-                                <button class="priority-btn" data-priority="low"><i class="fas fa-flag"></i></button>
-                                <button class="priority-btn" data-priority="medium"><i class="fas fa-flag"></i></button>
-                                <button class="priority-btn" data-priority="high"><i class="fas fa-flag"></i></button>
+                                <button class="priority-btn" data-priority="low" title="低优先级"><i class="fas fa-flag"></i></button>
+                                <button class="priority-btn active" data-priority="medium" title="中优先级"><i class="fas fa-flag"></i></button>
+                                <button class="priority-btn" data-priority="high" title="高优先级"><i class="fas fa-flag"></i></button>
                             </div>
                             <button class="add-todo-btn" id="addTodoBtn"><i class="fas fa-plus"></i></button>
                         </div>
                         <div class="todo-filters">
                             <button class="filter-btn active" data-filter="all">全部</button>
+                            <button class="filter-btn" data-filter="today">今天</button>
                             <button class="filter-btn" data-filter="active">进行中</button>
                             <button class="filter-btn" data-filter="completed">已完成</button>
                         </div>
@@ -85,52 +88,12 @@
                     </div>
                 </section>
 
+                <!-- 周任务完成趋势 -->
                 <section class="dashboard-card chart-card">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-chart-bar"></i> 周任务完成趋势</h2>
                     </div>
                     <div class="card-body"><canvas id="taskTrendChart"></canvas></div>
-                </section>
-
-                <section class="dashboard-card chart-card">
-                    <div class="card-header">
-                        <h2 class="card-title"><i class="fas fa-chart-pie"></i> 学习时间分布</h2>
-                    </div>
-                    <div class="card-body"><canvas id="studyTimeChart"></canvas></div>
-                </section>
-
-                <section class="dashboard-card stats-card">
-                    <div class="card-header">
-                        <h2 class="card-title"><i class="fas fa-chart-area"></i> 统计概览</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="stat-info"><span class="stat-value">156</span><span class="stat-label">已完成任务</span></div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="stat-info"><span class="stat-value">238h</span><span class="stat-label">学习时间</span></div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                                    <i class="fas fa-fire"></i>
-                                </div>
-                                <div class="stat-info"><span class="stat-value">28</span><span class="stat-label">连续打卡</span></div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <div class="stat-info"><span class="stat-value">89%</span><span class="stat-label">完成率</span></div>
-                            </div>
-                        </div>
-                    </div>
                 </section>
             </div>
         </div>
@@ -144,6 +107,7 @@
     </footer>
 
     <button class="back-to-top" id="backToTop"><i class="fas fa-arrow-up"></i></button>
+    <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
     <script src="js/dashboard.js"></script>
 </body>

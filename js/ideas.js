@@ -37,8 +37,36 @@ class IdeasManager {
     }
 
     init() {
+        this.checkAuth();
         this.render();
         this.attachEventListeners();
+    }
+
+    async checkAuth() {
+        // 检查是否有编辑权限
+        this.canEdit = auth.isAuthenticated();
+        
+        // 如果没有权限，隐藏编辑按钮
+        if (!this.canEdit) {
+            const addBtn = document.getElementById('addIdeaBtn');
+            if (addBtn) {
+                addBtn.style.display = 'none';
+            }
+        }
+    }
+
+    async requireAuth() {
+        if (!this.canEdit) {
+            const success = await auth.showLoginDialog('此操作需要管理员权限');
+            if (success) {
+                this.canEdit = true;
+                const addBtn = document.getElementById('addIdeaBtn');
+                if (addBtn) addBtn.style.display = 'inline-flex';
+                this.render();
+            }
+            return success;
+        }
+        return true;
     }
 
     render() {
@@ -80,18 +108,8 @@ class IdeasManager {
             day: 'numeric'
         });
 
-        card.innerHTML = `
-            <div class="idea-header">
-                ${idea.pinned ? '<div class="idea-pin-badge"><i class="fas fa-thumbtack"></i> 已置顶</div>' : ''}
-                <h3 class="idea-title">${this.escapeHtml(idea.title)}</h3>
-                <div class="idea-date">${formattedDate}</div>
-            </div>
-            <div class="idea-content">
-                <p class="idea-text">${this.escapeHtml(idea.content)}</p>
-            </div>
-            <div class="idea-tags">
-                ${idea.tags.map(tag => `<span class="idea-tag">${this.escapeHtml(tag)}</span>`).join('')}
-            </div>
+        // 根据权限决定是否显示操作按钮
+        const actionsHtml = this.canEdit ? `
             <div class="idea-actions">
                 <button class="idea-action-btn pin-btn ${idea.pinned ? 'active' : ''}" data-action="pin">
                     <i class="fas fa-thumbtack"></i>
@@ -106,18 +124,35 @@ class IdeasManager {
                     删除
                 </button>
             </div>
+        ` : '';
+
+        card.innerHTML = `
+            <div class="idea-header">
+                ${idea.pinned ? '<div class="idea-pin-badge"><i class="fas fa-thumbtack"></i> 已置顶</div>' : ''}
+                <h3 class="idea-title">${this.escapeHtml(idea.title)}</h3>
+                <div class="idea-date">${formattedDate}</div>
+            </div>
+            <div class="idea-content">
+                <p class="idea-text">${this.escapeHtml(idea.content)}</p>
+            </div>
+            <div class="idea-tags">
+                ${idea.tags.map(tag => `<span class="idea-tag">${this.escapeHtml(tag)}</span>`).join('')}
+            </div>
+            ${actionsHtml}
         `;
 
-        // 添加事件监听
-        card.querySelectorAll('.idea-action-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const action = btn.dataset.action;
-                if (action === 'pin') this.togglePin(idea.id);
-                if (action === 'edit') this.editIdea(idea.id);
-                if (action === 'delete') this.deleteIdea(idea.id);
+        // 只在有权限时添加事件监听
+        if (this.canEdit) {
+            card.querySelectorAll('.idea-action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const action = btn.dataset.action;
+                    if (action === 'pin') this.togglePin(idea.id);
+                    if (action === 'edit') this.editIdea(idea.id);
+                    if (action === 'delete') this.deleteIdea(idea.id);
+                });
             });
-        });
+        }
 
         return card;
     }
@@ -184,7 +219,10 @@ class IdeasManager {
         this.currentEditId = null;
     }
 
-    saveIdea() {
+    async saveIdea() {
+        // 权限检查
+        if (!await this.requireAuth()) return;
+
         const titleInput = document.getElementById('ideaTitle');
         const contentInput = document.getElementById('ideaContent');
         const tagsInput = document.getElementById('ideaTags');
@@ -237,7 +275,10 @@ class IdeasManager {
         this.showToast(this.currentEditId ? '想法已更新' : '想法已添加');
     }
 
-    togglePin(id) {
+    async togglePin(id) {
+        // 权限检查
+        if (!await this.requireAuth()) return;
+
         const idea = this.ideas.find(i => i.id === id);
         if (idea) {
             idea.pinned = !idea.pinned;
@@ -247,7 +288,10 @@ class IdeasManager {
         }
     }
 
-    editIdea(id) {
+    async editIdea(id) {
+        // 权限检查
+        if (!await this.requireAuth()) return;
+
         this.currentEditId = id;
         const idea = this.ideas.find(i => i.id === id);
         if (idea) {
@@ -255,7 +299,10 @@ class IdeasManager {
         }
     }
 
-    deleteIdea(id) {
+    async deleteIdea(id) {
+        // 权限检查
+        if (!await this.requireAuth()) return;
+
         if (confirm('确定要删除这个想法吗？')) {
             const card = document.querySelector(`.idea-card[data-id="${id}"]`);
             

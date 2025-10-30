@@ -1,32 +1,96 @@
 // ===== 数据面板功能 =====
 
-// ===== 日历功能 =====
-class Calendar {
-    constructor(containerEl) {
-        this.container = containerEl;
+// ===== 日历TODO融合功能 =====
+class CalendarTodo {
+    constructor() {
         this.currentDate = new Date();
-        this.viewMode = 'month';
-        this.events = storage.get('calendar_events') || {};
+        this.selectedDate = null; // 当前选中的日期
+        this.todos = storage.get('todos') || [];
+        this.currentFilter = 'all';
+        this.canEdit = false;
+        
+        // 迁移旧数据：为没有 dateStr 的任务添加默认日期
+        this.migrateTodos();
+        
         this.init();
     }
 
-    init() {
-        this.render();
-        this.attachEventListeners();
+    // 获取日期字符串
+    getDateString(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
-    render() {
+    // 迁移旧数据
+    migrateTodos() {
+        let needsSave = false;
+        const today = new Date();
+        const todayStr = this.getDateString(today);
+        
+        this.todos = this.todos.map(todo => {
+            if (!todo.dateStr) {
+                needsSave = true;
+                return {
+                    ...todo,
+                    dateStr: todayStr,
+                    displayDate: '今天',
+                    createdAt: todo.createdAt || new Date().toISOString()
+                };
+            }
+            return todo;
+        });
+        
+        if (needsSave) {
+            storage.set('todos', this.todos);
+        }
+    }
+
+    async init() {
+        this.checkAuth(); // 去掉 await，同步检查
+        this.renderCalendar();
+        this.renderTodos();
+        this.attachEventListeners();
+        this.updateStats();
+    }
+
+    checkAuth() {
+        this.canEdit = auth.isAuthenticated();
+        if (!this.canEdit) {
+            const addForm = document.querySelector('.add-todo-form');
+            if (addForm) addForm.style.display = 'none';
+        }
+    }
+
+    async requireAuth() {
+        if (!this.canEdit) {
+            const success = await auth.showLoginDialog('此操作需要管理员权限');
+            if (success) {
+                this.canEdit = true;
+                const addForm = document.querySelector('.add-todo-form');
+                if (addForm) addForm.style.display = 'flex';
+                this.renderTodos();
+            }
+            return success;
+        }
+        return true;
+    }
+
+    // 渲染日历
+    renderCalendar() {
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
         
-        // 更新月份显示
-        document.getElementById('currentMonth').textContent = 
-            `${year}年${month + 1}月`;
+        document.getElementById('currentMonth').textContent = `${year}年${month + 1}月`;
         
-        // 清空日历
-        this.container.innerHTML = '';
+        const calendarGrid = document.getElementById('calendarGrid');
+        if (!calendarGrid) {
+            console.error('calendarGrid 元素未找到');
+            return;
+        }
+        calendarGrid.innerHTML = '';
         
-        // 获取当月第一天和最后一天
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         const prevLastDay = new Date(year, month, 0);
@@ -34,100 +98,87 @@ class Calendar {
         const firstDayWeek = firstDay.getDay();
         const lastDate = lastDay.getDate();
         const prevLastDate = prevLastDay.getDate();
+        const today = new Date();
         
         // 上个月的日期
         for (let i = firstDayWeek - 1; i >= 0; i--) {
             const day = prevLastDate - i;
-            this.createDayCell(day, 'other-month');
+            const cell = this.createDayCell(day, year, month - 1, 'other-month');
+            calendarGrid.appendChild(cell);
         }
         
         // 当月日期
-        const today = new Date();
         for (let day = 1; day <= lastDate; day++) {
-            const isToday = 
-                day === today.getDate() && 
-                month === today.getMonth() && 
-                year === today.getFullYear();
+            const isToday = day === today.getDate() && 
+                           month === today.getMonth() && 
+                           year === today.getFullYear();
             
-            const dateKey = `${year}-${month + 1}-${day}`;
-            const hasTasks = this.events[dateKey] && this.events[dateKey].length > 0;
+            const isSelected = this.selectedDate && 
+                              day === this.selectedDate.getDate() &&
+                              month === this.selectedDate.getMonth() &&
+                              year === this.selectedDate.getFullYear();
             
-            const classes = isToday ? 'today' : '';
-            this.createDayCell(day, classes, hasTasks);
+            const cell = this.createDayCell(day, year, month, isToday ? 'today' : (isSelected ? 'selected' : ''));
+            calendarGrid.appendChild(cell);
         }
         
         // 下个月的日期
-        const remainingCells = 42 - this.container.children.length;
+        const remainingCells = 42 - calendarGrid.children.length;
         for (let day = 1; day <= remainingCells; day++) {
-            this.createDayCell(day, 'other-month');
+            const cell = this.createDayCell(day, year, month + 1, 'other-month');
+            calendarGrid.appendChild(cell);
         }
     }
 
-    createDayCell(day, className = '', hasTasks = false) {
+    createDayCell(day, year, month, className = '') {
         const cell = document.createElement('div');
         cell.className = `calendar-day ${className}`;
-        if (hasTasks) cell.classList.add('has-tasks');
         cell.textContent = day;
         
-        cell.addEventListener('click', () => {
-            console.log(`选中日期: ${day}`);
-            // 这里可以添加显示当天任务的功能
-        });
+        // 检查该日期是否有任务
+        const dateStr = this.getDateString(new Date(year, month, day));
+        const hasTasks = this.todos.some(todo => todo.dateStr === dateStr);
+        if (hasTasks) cell.classList.add('has-tasks');
         
-        this.container.appendChild(cell);
-    }
-
-    attachEventListeners() {
-        document.getElementById('prevMonth').addEventListener('click', () => {
-            this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-            this.render();
-        });
-        
-        document.getElementById('nextMonth').addEventListener('click', () => {
-            this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-            this.render();
-        });
-        
-        // 视图模式切换
-        document.querySelectorAll('.view-mode-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.view-mode-btn').forEach(b => 
-                    b.classList.remove('active'));
-                this.classList.add('active');
-                // 可以在这里实现不同视图的切换
+        // 非其他月的日期可点击
+        if (!className.includes('other-month')) {
+            cell.addEventListener('click', () => {
+                this.selectedDate = new Date(year, month, day);
+                this.currentFilter = 'date';
+                this.renderCalendar();
+                this.renderTodos();
+                this.updateTitle();
             });
-        });
-    }
-}
-
-// ===== TODO列表功能 =====
-class TodoList {
-    constructor() {
-        this.todos = storage.get('todos') || this.getDefaultTodos();
-        this.currentFilter = 'all';
-        this.selectedPriority = 'medium';
-        this.init();
+        }
+        
+        return cell; // 返回 cell 而不是直接 appendChild
     }
 
-    getDefaultTodos() {
-        return [
-            { id: generateId(), text: '完成个人网站首页设计', priority: 'high', completed: false, date: '今天 14:00' },
-            { id: generateId(), text: '学习TypeScript高级特性', priority: 'medium', completed: false, date: '明天 10:00' },
-            { id: generateId(), text: '阅读React文档', priority: 'low', completed: true, date: '昨天 16:00' }
-        ];
+    // 更新标题
+    updateTitle() {
+        const titleEl = document.getElementById('selectedDateTitle');
+        if (this.currentFilter === 'date' && this.selectedDate) {
+            const month = this.selectedDate.getMonth() + 1;
+            const day = this.selectedDate.getDate();
+            titleEl.textContent = `${month}月${day}日的任务`;
+        } else if (this.currentFilter === 'today') {
+            titleEl.textContent = '今天的任务';
+        } else {
+            titleEl.textContent = '全部任务';
+        }
     }
 
-    init() {
-        this.render();
-        this.attachEventListeners();
-        this.updateStats();
-    }
-
-    render() {
+    // 渲染TODO列表
+    renderTodos() {
         const todoList = document.getElementById('todoList');
         todoList.innerHTML = '';
         
         const filteredTodos = this.getFilteredTodos();
+        
+        if (filteredTodos.length === 0) {
+            todoList.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary);">暂无任务</div>';
+            return;
+        }
         
         filteredTodos.forEach(todo => {
             const todoEl = this.createTodoElement(todo);
@@ -142,20 +193,12 @@ class TodoList {
         div.className = `todo-item ${todo.completed ? 'completed' : ''}`;
         div.dataset.priority = todo.priority;
         div.dataset.id = todo.id;
-        div.draggable = true;
         
-        div.innerHTML = `
-            <div class="todo-checkbox">
-                <input type="checkbox" id="todo-${todo.id}" ${todo.completed ? 'checked' : ''}>
-                <label for="todo-${todo.id}"></label>
-            </div>
-            <div class="todo-content">
-                <span class="todo-text">${todo.text}</span>
-                <span class="todo-date">
-                    <i class="far fa-clock"></i>
-                    ${todo.date}
-                </span>
-            </div>
+        if (this.canEdit) {
+            div.draggable = true;
+        }
+        
+        const actionsHtml = this.canEdit ? `
             <div class="todo-actions">
                 <button class="todo-action-btn edit-btn" aria-label="编辑">
                     <i class="fas fa-edit"></i>
@@ -164,16 +207,49 @@ class TodoList {
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
+        ` : '';
+        
+        div.innerHTML = `
+            <div class="todo-checkbox">
+                <input type="checkbox" id="todo-${todo.id}" ${todo.completed ? 'checked' : ''} ${this.canEdit ? '' : 'disabled'}>
+                <label for="todo-${todo.id}"></label>
+            </div>
+            <div class="todo-content">
+                <span class="todo-text">${this.escapeHtml(todo.text)}</span>
+                <span class="todo-date">
+                    <i class="far fa-clock"></i>
+                    ${todo.displayDate || todo.dateStr || '今天'}
+                </span>
+            </div>
+            ${actionsHtml}
         `;
         
         return div;
     }
 
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // 事件监听
     attachEventListeners() {
+        // 日历导航
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+            this.renderCalendar();
+        });
+        
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+            this.renderCalendar();
+        });
+        
+        // 添加任务
         const addBtn = document.getElementById('addTodoBtn');
         const input = document.getElementById('todoInput');
         
-        // 添加任务
         addBtn.addEventListener('click', () => this.addTodo());
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.addTodo();
@@ -195,38 +271,20 @@ class TodoList {
                     b.classList.remove('active'));
                 e.target.classList.add('active');
                 this.currentFilter = e.target.dataset.filter;
-                this.render();
+                if (this.currentFilter !== 'date') {
+                    this.selectedDate = null;
+                }
+                this.renderCalendar();
+                this.renderTodos();
+                this.updateTitle();
             });
         });
     }
 
-    attachTodoEventListeners() {
-        // 复选框
-        document.querySelectorAll('.todo-item input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const todoId = e.target.closest('.todo-item').dataset.id;
-                this.toggleTodo(todoId);
-            });
-        });
-        
-        // 删除按钮
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const todoId = e.target.closest('.todo-item').dataset.id;
-                this.deleteTodo(todoId);
-            });
-        });
-        
-        // 拖拽事件
-        document.querySelectorAll('.todo-item').forEach(item => {
-            item.addEventListener('dragstart', this.handleDragStart);
-            item.addEventListener('dragover', this.handleDragOver);
-            item.addEventListener('drop', this.handleDrop.bind(this));
-            item.addEventListener('dragend', this.handleDragEnd);
-        });
-    }
+    // 添加任务
+    async addTodo() {
+        if (!await this.requireAuth()) return;
 
-    addTodo() {
         const input = document.getElementById('todoInput');
         const text = input.value.trim();
         
@@ -235,68 +293,150 @@ class TodoList {
         const activeBtn = document.querySelector('.priority-btn.active');
         const priority = activeBtn ? activeBtn.dataset.priority : 'medium';
         
+        // 使用选中的日期或今天
+        const taskDate = this.selectedDate || new Date();
+        const dateStr = this.getDateString(taskDate);
+        
         const newTodo = {
             id: generateId(),
             text: text,
             priority: priority,
             completed: false,
-            date: '今天 ' + new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+            dateStr: dateStr,
+            displayDate: this.formatDisplayDate(taskDate),
+            createdAt: new Date().toISOString()
         };
         
         this.todos.unshift(newTodo);
         this.saveTodos();
-        this.render();
+        this.renderCalendar();
+        this.renderTodos();
         this.updateStats();
         
         input.value = '';
         
-        // 动画效果
         const firstItem = document.querySelector('.todo-item');
         if (firstItem) {
             firstItem.style.animation = 'slideInLeft 0.3s ease-out';
         }
     }
 
-    toggleTodo(id) {
+    // 格式化显示日期
+    formatDisplayDate(date) {
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const dateStr = this.getDateString(date);
+        const todayStr = this.getDateString(today);
+        const yesterdayStr = this.getDateString(yesterday);
+        const tomorrowStr = this.getDateString(tomorrow);
+        
+        if (dateStr === todayStr) return '今天';
+        if (dateStr === yesterdayStr) return '昨天';
+        if (dateStr === tomorrowStr) return '明天';
+        
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        return `${month}月${day}日`;
+    }
+
+    // 切换任务完成状态
+    async toggleTodo(id) {
+        if (!await this.requireAuth()) {
+            const checkbox = document.querySelector(`.todo-item[data-id="${id}"] input[type="checkbox"]`);
+            if (checkbox) {
+                const todo = this.todos.find(t => t.id === id);
+                if (todo) checkbox.checked = todo.completed;
+            }
+            return;
+        }
+
         const todo = this.todos.find(t => t.id === id);
         if (todo) {
             todo.completed = !todo.completed;
             this.saveTodos();
-            this.render();
+            this.renderTodos();
             this.updateStats();
         }
     }
 
-    deleteTodo(id) {
+    // 删除任务
+    async deleteTodo(id) {
+        if (!await this.requireAuth()) return;
+
         const item = document.querySelector(`.todo-item[data-id="${id}"]`);
-        
-        // 删除动画
         item.style.animation = 'fadeOut 0.3s ease-out';
+        
         setTimeout(() => {
             this.todos = this.todos.filter(t => t.id !== id);
             this.saveTodos();
-            this.render();
+            this.renderCalendar();
+            this.renderTodos();
             this.updateStats();
         }, 300);
     }
 
+    // 过滤任务
     getFilteredTodos() {
-        if (this.currentFilter === 'all') return this.todos;
-        if (this.currentFilter === 'active') return this.todos.filter(t => !t.completed);
-        if (this.currentFilter === 'completed') return this.todos.filter(t => t.completed);
-        return this.todos;
+        let filtered = this.todos;
+        
+        if (this.currentFilter === 'date' && this.selectedDate) {
+            const dateStr = this.getDateString(this.selectedDate);
+            filtered = filtered.filter(t => t.dateStr === dateStr);
+        } else if (this.currentFilter === 'today') {
+            const todayStr = this.getDateString(new Date());
+            filtered = filtered.filter(t => t.dateStr === todayStr);
+        } else if (this.currentFilter === 'active') {
+            filtered = filtered.filter(t => !t.completed);
+        } else if (this.currentFilter === 'completed') {
+            filtered = filtered.filter(t => t.completed);
+        }
+        
+        return filtered;
     }
 
+    // 更新统计
     updateStats() {
-        const total = this.todos.length;
-        const completed = this.todos.filter(t => t.completed).length;
+        const filtered = this.getFilteredTodos();
+        const total = filtered.length;
+        const completed = filtered.filter(t => t.completed).length;
         
         document.getElementById('totalCount').textContent = total;
         document.getElementById('completedCount').textContent = completed;
     }
 
+    // 保存到本地存储
     saveTodos() {
         storage.set('todos', this.todos);
+    }
+
+    // TODO项事件监听
+    attachTodoEventListeners() {
+        document.querySelectorAll('.todo-item input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const todoId = e.target.closest('.todo-item').dataset.id;
+                this.toggleTodo(todoId);
+            });
+        });
+        
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const todoId = e.target.closest('.todo-item').dataset.id;
+                this.deleteTodo(todoId);
+            });
+        });
+        
+        if (this.canEdit) {
+            document.querySelectorAll('.todo-item').forEach(item => {
+                item.addEventListener('dragstart', this.handleDragStart);
+                item.addEventListener('dragover', this.handleDragOver);
+                item.addEventListener('drop', this.handleDrop.bind(this));
+                item.addEventListener('dragend', this.handleDragEnd);
+            });
+        }
     }
 
     // 拖拽处理
@@ -329,7 +469,7 @@ class TodoList {
             this.todos.splice(dropIndex, 0, removed);
             
             this.saveTodos();
-            this.render();
+            this.renderTodos();
         }
         
         return false;
@@ -354,10 +494,11 @@ function initCharts() {
                 datasets: [{
                     label: '已完成任务',
                     data: [5, 8, 6, 9, 7, 10, 8],
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderColor: '#1a1a1a',
+                    backgroundColor: 'rgba(26, 26, 26, 0.05)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    borderWidth: 2
                 }]
             },
             options: {
@@ -373,37 +514,15 @@ function initCharts() {
                         beginAtZero: true,
                         ticks: {
                             stepSize: 2
+                        },
+                        grid: {
+                            color: '#f0f0f0'
                         }
-                    }
-                }
-            }
-        });
-    }
-
-    // 学习时间分布饼图
-    const pieCtx = document.getElementById('studyTimeChart');
-    if (pieCtx && typeof Chart !== 'undefined') {
-        new Chart(pieCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['前端开发', '后端开发', 'UI设计', '算法学习', '其他'],
-                datasets: [{
-                    data: [35, 25, 20, 15, 5],
-                    backgroundColor: [
-                        '#667eea',
-                        '#764ba2',
-                        '#f093fb',
-                        '#4facfe',
-                        '#43e97b'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
@@ -413,40 +532,41 @@ function initCharts() {
 
 // ===== 初始化 =====
 document.addEventListener('DOMContentLoaded', () => {
-    // 初始化日历
-    const calendarGrid = document.getElementById('calendarGrid');
-    if (calendarGrid) {
-        new Calendar(calendarGrid);
+    try {
+        // 初始化日历TODO融合系统
+        const calendarTodo = new CalendarTodo();
+        
+        // 初始化图表
+        initCharts();
+        
+        console.log('数据面板加载完成');
+    } catch (error) {
+        console.error('数据面板初始化错误:', error);
+        alert('数据面板加载失败，请查看控制台: ' + error.message);
     }
-
-    // 初始化TODO列表
-    new TodoList();
-
-    // 初始化图表
-    initCharts();
-
-    // 刷新按钮
-    const refreshBtn = document.getElementById('refreshBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
-            this.querySelector('i').style.animation = 'spin 0.5s linear';
-            setTimeout(() => {
-                this.querySelector('i').style.animation = '';
-            }, 500);
-        });
-    }
-
-    console.log('数据面板加载完成');
 });
 
 // 添加fadeOut动画样式
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        to {
-            opacity: 0;
-            transform: translateX(-20px);
+(function() {
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
         }
-    }
-`;
-document.head.appendChild(style);
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    `;
+    document.head.appendChild(styleEl);
+})();

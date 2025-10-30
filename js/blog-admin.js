@@ -497,7 +497,11 @@ class BlogAdmin {
 // 初始化
 let blogAdmin;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // 页面保护 - 需要验证才能访问
+    const authenticated = await auth.protectPage();
+    if (!authenticated) return;
+    
     blogAdmin = new BlogAdmin();
     console.log('博客管理页面加载完成');
 });
