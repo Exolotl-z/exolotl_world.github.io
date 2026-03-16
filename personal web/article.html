@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="文章详情页">
+    <title>文章详情 - 我的个人网站</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/article.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Markdown样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+    <!-- 代码高亮 - 使用浅色主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+</head>
+<body class="article-page">
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <i class="fas fa-code"></i>
+                    <span>我的空间</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="blog.html" class="nav-link active">博客</a></li>
+                <li><a href="ideas.html" class="nav-link">奇思妙想</a></li>
+                <li><a href="about.html" class="nav-link">关于我</a></li>
+            </ul>
+            <div class="nav-auth" id="navAuth">
+                <button class="auth-btn" id="authBtn">
+                    <i class="fas fa-user"></i>
+                    <span>登录</span>
+                </button>
+            </div>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <!-- 文章内容 -->
+    <main class="article-main">
+        <div class="article-container">
+            <!-- 文章头部 -->
+            <header class="article-header">
+                <a href="blog.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    返回博客
+                </a>
+                <h1 class="article-title" id="articleTitle">加载中...</h1>
+                <div class="article-meta">
+                    <span class="meta-item loading">加载中...</span>
+                </div>
+                <div class="article-tags" id="articleTagsContainer">
+                </div>
+            </header>
+
+            <!-- 文章正文 - 动态加载 -->
+            <article class="markdown-body" id="articleContent">
+                <div class="loading-placeholder">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>加载中...</span>
+                </div>
+            </article>
+
+            <!-- 文章底部操作 -->
+            <div class="article-actions">
+                <button class="action-btn like-btn" id="likeBtn">
+                    <i class="far fa-heart"></i>
+                    <span>89</span>
+                </button>
+                <button class="action-btn bookmark-btn" id="bookmarkBtn">
+                    <i class="far fa-bookmark"></i>
+                    <span>收藏</span>
+                </button>
+                <button class="action-btn share-btn" id="shareBtn">
+                    <i class="fas fa-share-alt"></i>
+                    <span>分享</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>万物皆虚，万物皆允</p>
+            <p>登楼撤梯，见月忽指</p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop" aria-label="回到顶部">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Markdown解析器 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.0.3/marked.min.js"></script>
+    <!-- 代码高亮 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/article.js"></script>
+
+    <!-- AOS 动画库 -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 100,
+                easing: 'ease-out-cubic'
+            });
+        });
+    </script>
+</body>
+</html>

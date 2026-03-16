@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="博客管理 - 管理你的文章">
+    <title>文章管理 - 我的个人网站</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/blog-admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <i class="fas fa-code"></i>
+                    <span>我的空间</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="blog.html" class="nav-link">博客</a></li>
+                <li><a href="ideas.html" class="nav-link">奇思妙想</a></li>
+                <li><a href="about.html" class="nav-link">关于我</a></li>
+            </ul>
+            <div class="nav-auth" id="navAuth">
+                <button class="auth-btn" id="authBtn">
+                    <i class="fas fa-user"></i>
+                    <span>登录</span>
+                </button>
+            </div>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="main-content">
+        <!-- 页面头部 -->
+        <section class="admin-hero">
+            <div class="container">
+                <div class="hero-content" data-aos="fade-up">
+                    <h1 class="hero-title">
+                        <i class="fas fa-pen-fancy"></i>
+                        文章管理
+                    </h1>
+                    <p class="hero-subtitle">创作、编辑和管理你的文章</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 操作面板 -->
+        <section class="admin-actions">
+            <div class="container">
+                <div class="actions-grid">
+                    <!-- 新建文章 -->
+                    <button class="action-card" id="newArticleBtn" onclick="openNewArticleModal()">
+                        <div class="action-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="action-info">
+                            <h3>新建文章</h3>
+                            <p>创建一篇新文章</p>
+                        </div>
+                    </button>
+
+                    <!-- 上传文件 -->
+                    <button class="action-card" id="uploadBtn" onclick="document.getElementById('fileInput').click()">
+                        <div class="action-icon">
+                            <i class="fas fa-file-upload"></i>
+                        </div>
+                        <div class="action-info">
+                            <h3>上传Markdown</h3>
+                            <p>导入.md文件</p>
+                        </div>
+                    </button>
+                    <input type="file" id="fileInput" accept=".md,.markdown" style="display: none;" multiple onchange="handleFileUpload(this.files); this.value=''">
+
+                    <!-- 导出文章 -->
+                    <button class="action-card" id="exportBtn" onclick="exportArticles()">
+                        <div class="action-icon">
+                            <i class="fas fa-file-download"></i>
+                        </div>
+                        <div class="action-info">
+                            <h3>导出Markdown</h3>
+                            <p>下载所有.md文件</p>
+                        </div>
+                    </button>
+
+                    <!-- 清除数据 -->
+                    <button class="action-card" id="clearDataBtn" onclick="if(confirm('确定要清除所有博客数据吗？此操作不可恢复！')) { clearAllData(); }">
+                        <div class="action-icon" style="background: #dc2626;">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <div class="action-info">
+                            <h3>清除数据</h3>
+                            <p>清除所有博客数据</p>
+                        </div>
+                    </button>
+
+                    <!-- 分类管理 -->
+                    <button class="action-card" id="manageCategoriesBtn" onclick="openCategoryModal()">
+                        <div class="action-icon" style="background: #7c3aed;">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <div class="action-info">
+                            <h3>分类管理</h3>
+                            <p>添加/删除分类</p>
+                        </div>
+                    </button>
+
+                    <!-- 数据同步 -->
+                    <button class="action-card" id="syncDataBtn" onclick="showExportPanel()">
+                        <div class="action-icon" style="background: #059669;">
+                            <i class="fas fa-sync"></i>
+                        </div>
+                        <div class="action-info">
+                            <h3>数据同步</h3>
+                            <p>导出JSON到GitHub</p>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- 拖拽上传区域 -->
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>拖拽 Markdown 文件到此处上传</p>
+                        <span>支持 .md 和 .markdown 文件</span>
+                    </div>
+                </div>
+
+                <!-- 上传进度 -->
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="progress-list" id="progressList"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 文章列表 -->
+        <section class="admin-content">
+            <div class="container">
+                <!-- 筛选栏 -->
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="搜索文章...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="categoryFilter" class="filter-select">
+                            <option value="all">全部分类</option>
+                        </select>
+                        <select id="statusFilter" class="filter-select">
+                            <option value="all">全部状态</option>
+                            <option value="published">已发布</option>
+                            <option value="draft">草稿</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 文章表格 -->
+                <div class="articles-table-wrapper">
+                    <table class="articles-table">
+                        <thead>
+                            <tr>
+                                <th class="th-checkbox">
+                                    <input type="checkbox" id="selectAll">
+                                </th>
+                                <th class="th-title">标题</th>
+                                <th class="th-category">分类</th>
+                                <th class="th-tags">标签</th>
+                                <th class="th-date">日期</th>
+                                <th class="th-status">状态</th>
+                                <th class="th-actions">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="articlesTableBody">
+                            <!-- 文章将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+
+                    <!-- 空状态 -->
+                    <div class="empty-state" id="emptyState" style="display: none;">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>暂无文章</h3>
+                        <p>点击上方按钮创建第一篇文章</p>
+                    </div>
+                </div>
+
+                <!-- 批量操作 -->
+                <div class="batch-actions" id="batchActions" style="display: none;">
+                    <span class="selected-count">已选择 <span id="selectedCount">0</span> 项</span>
+                    <button class="btn btn-secondary" id="batchPublish">
+                        <i class="fas fa-share"></i> 批量发布
+                    </button>
+                    <button class="btn btn-secondary" id="batchDelete">
+                        <i class="fas fa-trash"></i> 批量删除
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 文章编辑模态框 -->
+    <div class="modal" id="articleModal">
+        <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="modalTitle">新建文章</h2>
+                <div class="modal-header-actions">
+                    <button class="modal-btn" id="previewBtn" title="预览" onclick="showPreview()">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="modal-close" id="modalClose" onclick="closeModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="articleTitle">标题 <span class="required">*</span></label>
+                    <input type="text" id="articleTitle" class="form-input" placeholder="输入文章标题">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="articleCategory">分类 <span class="required">*</span></label>
+                        <div class="input-with-add">
+                            <select id="articleCategory" class="form-input">
+                                <!-- 分类将由JavaScript动态生成 -->
+                            </select>
+                            <button type="button" class="add-btn" id="addCategoryBtn" title="添加新分类" onclick="openCategoryModal()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleDate">发布日期</label>
+                        <input type="date" id="articleDate" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="articleTags">标签</label>
+                    <div class="tags-input-container" id="tagsInputContainer">
+                        <div class="selected-tags" id="selectedTags"></div>
+                        <input type="text" id="articleTags" class="form-input tags-input" placeholder="输入标签名称，回车添加">
+                    </div>
+                    <div class="suggested-tags" id="suggestedTags"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="articleExcerpt">摘要</label>
+                    <textarea id="articleExcerpt" class="form-textarea" rows="3" placeholder="文章简短摘要，显示在列表中"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="articleContent">
+                        内容 (Markdown)
+                        <span class="label-hint">支持 Markdown 语法</span>
+                    </label>
+                    <textarea id="articleContent" class="form-textarea code-editor" rows="20" placeholder="# 文章标题&#10;&#10;在这里编写内容..."></textarea>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="articlePinned">
+                        <span>置顶文章</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="articlePublished" checked>
+                        <span>立即发布</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn" onclick="closeModal()">取消</button>
+                <button class="btn btn-secondary" id="saveDraftBtn" onclick="saveArticle(false)">保存草稿</button>
+                <button class="btn btn-primary" id="saveBtn" onclick="saveArticle(true)">发布</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 预览模态框 -->
+    <div class="modal" id="previewModal">
+        <div class="modal-overlay" id="previewModalOverlay" onclick="closePreviewModal()"></div>
+        <div class="modal-content modal-preview">
+            <div class="modal-header">
+                <h2>文章预览</h2>
+                <button class="modal-close" id="previewModalClose" onclick="closePreviewModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <article class="preview-article" id="previewContent"></article>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePreviewModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分类管理模态框 -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-overlay" id="categoryModalOverlay" onclick="closeCategoryModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>分类管理</h2>
+                <button class="modal-close" id="categoryModalClose" onclick="closeCategoryModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- 分类列表 -->
+                <div id="categoryList" class="category-list"></div>
+
+                <!-- 添加新分类 -->
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <p style="font-weight: 500; margin-bottom: 0.75rem; color: var(--text-primary);">添加新分类</p>
+                    <div class="form-group">
+                        <input type="text" id="newCategoryName" class="form-input" placeholder="输入分类名称">
+                    </div>
+                    <div class="form-group">
+                        <select id="newCategoryIcon" class="form-input">
+                            <option value="fa-folder">📁 文件夹</option>
+                            <option value="fa-palette">🎨 前端</option>
+                            <option value="fa-server">🖥️ 后端</option>
+                            <option value="fa-cloud">☁️ DevOps</option>
+                            <option value="fa-robot">🤖 AI</option>
+                            <option value="fa-book">📚 教程</option>
+                            <option value="fa-code">💻 代码</option>
+                            <option value="fa-lightbulb">💡 灵感</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="categoryCancelBtn" onclick="closeCategoryModal()">关闭</button>
+                <button class="btn btn-primary" id="categorySaveBtn" onclick="addCategory()">添加分类</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-overlay" id="deleteModalOverlay" onclick="closeDeleteModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>确认删除</h2>
+                <button class="modal-close" id="deleteModalClose" onclick="closeDeleteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="delete-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    确定要删除选中的文章吗？此操作不可恢复。
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="deleteCancelBtn" onclick="closeDeleteModal()">取消</button>
+                <button class="btn btn-danger" id="deleteConfirmBtn">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>万物皆虚，万事皆允</p>
+            <p>登楼撤梯，见月忽指</p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop" aria-label="回到顶部">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/data-manager.js"></script>
+
+    <!-- 全局函数 - 确保在外部JS加载失败时也能工作 -->
+    <script>
+        // 简单的本地存储工具
+        var storage = {
+            get: function(key) {
+                try {
+                    var item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : null;
+                } catch (e) { return null; }
+            },
+            set: function(key, value) {
+                try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
+            },
+            remove: function(key) {
+                try { localStorage.removeItem(key); return true; } catch (e) { return false; }
+            }
+        };
+
+        // 生成ID
+        function generateId() {
+            return 'art_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // 添加标签到显示区域
+        function addTag(tag) {
+            var selectedTags = document.getElementById('selectedTags');
+            if (!selectedTags) return;
+            var tagItem = document.createElement('span');
+            tagItem.className = 'tag-item';
+            tagItem.innerHTML = tag + '<span class="remove-tag" onclick="this.parentElement.remove()">×</span>';
+            selectedTags.appendChild(tagItem);
+        }
+
+        // 检查标签是否已存在
+        function isTagExists(tag) {
+            var existingTags = document.querySelectorAll('#selectedTags .tag-item');
+            for (var i = 0; i < existingTags.length; i++) {
+                var text = existingTags[i].textContent.replace('×', '').trim();
+                if (text === tag) return true;
+            }
+            return false;
+        }
+
+        // 获取默认分类
+        function getDefaultCategories() {
+            return [
+                { id: 'frontend', name: '前端开发', icon: 'fa-palette' },
+                { id: 'backend', name: '后端开发', icon: 'fa-server' },
+                { id: 'devops', name: 'DevOps', icon: 'fa-cloud' },
+                { id: 'ai', name: '人工智能', icon: 'fa-robot' },
+                { id: 'other', name: '其他', icon: 'fa-folder' }
+            ];
+        }
+
+        // 博客数据
+        var blogData = {
+            articles: storage.get('blog_articles') || [],
+            categories: storage.get('blog_categories') || getDefaultCategories()
+        };
+
+        // 新建文章
+        function openNewArticleModal() {
+            document.getElementById('modalTitle').textContent = '新建文章';
+            document.getElementById('articleTitle').value = '';
+            document.getElementById('articleCategory').value = 'frontend';
+            document.getElementById('articleDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('articleTags').value = '';
+            document.getElementById('articleExcerpt').value = '';
+            document.getElementById('articleContent').value = '';
+            document.getElementById('articlePinned').checked = false;
+            document.getElementById('articlePublished').checked = true;
+            document.getElementById('selectedTags').innerHTML = '';
+            document.getElementById('articleModal').classList.add('active');
+            document.getElementById('articleTitle').focus();
+        }
+
+        // 打开分类管理
+        function openCategoryModal() {
+            renderCategoryList();
+            document.getElementById('categoryModal').classList.add('active');
+        }
+
+        // 渲染分类列表
+        function renderCategoryList() {
+            var list = document.getElementById('categoryList');
+            if (!list) return;
+
+            var categoryCounts = {};
+            blogData.articles.forEach(function(article) {
+                categoryCounts[article.category] = (categoryCounts[article.category] || 0) + 1;
+            });
+
+            var html = '';
+            blogData.categories.forEach(function(cat) {
+                html += '<div class="category-item" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--radius-md); margin-bottom: 0.5rem;">';
+                html += '<div style="display: flex; align-items: center; gap: 0.5rem;">';
+                html += '<i class="fas ' + cat.icon + '"></i>';
+                html += '<span>' + cat.name + '</span>';
+                html += '<span style="font-size: 0.75rem; color: var(--text-light);">(' + (categoryCounts[cat.id] || 0) + '篇)</span>';
+                html += '</div>';
+                html += '<button class="btn-delete-category" data-id="' + cat.id + '" style="background: none; border: none; color: var(--text-light); cursor: pointer; padding: 0.25rem;" onclick="deleteCategory(\'' + cat.id + '\')">';
+                html += '<i class="fas fa-trash"></i>';
+                html += '</button>';
+                html += '</div>';
+            });
+            list.innerHTML = html;
+        }
+
+        // 添加分类
+        function addCategory() {
+            var name = document.getElementById('newCategoryName').value.trim();
+            var icon = document.getElementById('newCategoryIcon').value;
+            if (!name) { alert('请输入分类名称'); return; }
+            if (blogData.categories.some(function(c) { return c.name === name; })) { alert('分类已存在'); return; }
+
+            var newCategory = {
+                id: name.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]+/g, '-'),
+                name: name,
+                icon: icon
+            };
+            blogData.categories.push(newCategory);
+            storage.set('blog_categories', blogData.categories);
+            document.getElementById('newCategoryName').value = '';
+            renderCategoryList();
+            renderCategorySelect();
+            alert('分类已添加');
+        }
+
+        // 删除分类
+        function deleteCategory(id) {
+            var category = blogData.categories.find(function(c) { return c.id === id; });
+            if (!category) return;
+
+            var articleCount = blogData.articles.filter(function(a) { return a.category === id; }).length;
+            if (articleCount > 0) {
+                if (!confirm('该分类下有 ' + articleCount + ' 篇文章，删除后这些文章将变为"其他"分类。确定要删除吗？')) return;
+                blogData.articles.forEach(function(article) {
+                    if (article.category === id) article.category = 'other';
+                });
+                storage.set('blog_articles', blogData.articles);
+            }
+            blogData.categories = blogData.categories.filter(function(c) { return c.id !== id; });
+            storage.set('blog_categories', blogData.categories);
+            renderCategoryList();
+            renderCategorySelect();
+            alert('分类已删除');
+        }
+
+        // 渲染分类下拉框
+        function renderCategorySelect() {
+            var selects = ['articleCategory', 'categoryFilter'];
+            selects.forEach(function(selectId) {
+                var select = document.getElementById(selectId);
+                if (!select) return;
+                var options = '';
+                blogData.categories.forEach(function(cat) {
+                    options += '<option value="' + cat.id + '">' + cat.name + '</option>';
+                });
+                if (selectId === 'categoryFilter') {
+                    select.innerHTML = '<option value="all">全部分类</option>' + options;
+                } else {
+                    select.innerHTML = options;
+                }
+            });
+        }
+
+        // 上传文件处理
+        function handleFileUpload(files) {
+            if (!files || files.length === 0) return;
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                if (!file.name.endsWith('.md') && !file.name.endsWith('.markdown')) {
+                    alert(file.name + ' 不是Markdown文件');
+                    continue;
+                }
+                (function(f) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var content = e.target.result;
+                        var timestamp = Date.now();
+                        var random = Math.random().toString(36).substr(2, 6);
+                        var originalName = f.name.replace(/\.md$/, '').replace(/[^\u4e00-\u9fa5a-z0-9]+/g, '-');
+                        var uniqueFilename = timestamp + '-' + random + '-' + originalName + '.md';
+
+                        var article = {
+                            id: generateId(),
+                            title: f.name.replace(/\.md$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, ''),
+                            content: content,
+                            excerpt: content.split('\n\n')[0].replace(/^#+\s*/, '').slice(0, 150),
+                            category: 'other',
+                            tags: [],
+                            date: new Date().toISOString().split('T')[0],
+                            published: true,
+                            pinned: false,
+                            filePath: 'articles/' + uniqueFilename,
+                            views: 0,
+                            likes: 0
+                        };
+                        blogData.articles.push(article);
+                        storage.set('blog_articles', blogData.articles);
+                        renderArticlesTable();
+                        alert(f.name + ' 上传成功');
+                    };
+                    reader.readAsText(f);
+                })(file);
+            }
+        }
+
+        // 渲染文章表格
+        function renderArticlesTable() {
+            var tbody = document.getElementById('articlesTableBody');
+            var emptyState = document.getElementById('emptyState');
+            if (!tbody) return;
+
+            if (blogData.articles.length === 0) {
+                tbody.innerHTML = '';
+                if (emptyState) emptyState.style.display = 'block';
+                return;
+            }
+            if (emptyState) emptyState.style.display = 'none';
+
+            var sorted = blogData.articles.slice().sort(function(a, b) {
+                if (a.pinned && !b.pinned) return -1;
+                if (!a.pinned && b.pinned) return 1;
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            var html = '';
+            sorted.forEach(function(article) {
+                var category = blogData.categories.find(function(c) { return c.id === article.category; }) || { name: article.category, icon: 'fa-folder' };
+                var date = new Date(article.date);
+                var formattedDate = date.toLocaleDateString('zh-CN');
+
+                html += '<tr data-id="' + article.id + '">';
+                html += '<td><input type="checkbox" class="article-checkbox" value="' + article.id + '"></td>';
+                html += '<td><span class="article-title-cell">' + (article.pinned ? '<i class="fas fa-thumbtack" style="color: var(--text-primary); margin-right: 0.5rem;"></i>' : '') + escapeHtml(article.title) + '</span></td>';
+                html += '<td><span class="category-badge"><i class="fas ' + category.icon + '"></i> ' + category.name + '</span></td>';
+                html += '<td><div class="tags-cell">';
+                var tags = article.tags || [];
+                tags.slice(0, 3).forEach(function(tag) {
+                    html += '<span class="tag">' + escapeHtml(tag) + '</span>';
+                });
+                if (tags.length > 3) html += '<span class="tag">+' + (tags.length - 3) + '</span>';
+                html += '</div></td>';
+                html += '<td>' + formattedDate + '</td>';
+                html += '<td><span class="status-badge ' + (article.published ? 'published' : 'draft') + '">' + (article.published ? '已发布' : '草稿') + '</span></td>';
+                html += '<td><div class="actions-cell">';
+                html += '<button class="action-btn edit-btn" data-id="' + article.id + '" onclick="editArticle(\'' + article.id + '\')"><i class="fas fa-edit"></i></button>';
+                html += '<button class="action-btn delete-btn" data-id="' + article.id + '" onclick="deleteArticleById(\'' + article.id + '\')"><i class="fas fa-trash"></i></button>';
+                html += '</div></td></tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 编辑文章
+        function editArticle(id) {
+            var article = blogData.articles.find(function(a) { return a.id === id; });
+            if (!article) return;
+
+            document.getElementById('modalTitle').textContent = '编辑文章';
+            document.getElementById('articleTitle').value = article.title;
+            document.getElementById('articleCategory').value = article.category || 'other';
+            document.getElementById('articleDate').value = article.date;
+            document.getElementById('articleExcerpt').value = article.excerpt || '';
+            document.getElementById('articleContent').value = article.content || '';
+            document.getElementById('articlePinned').checked = article.pinned || false;
+            document.getElementById('articlePublished').checked = article.published !== false;
+
+            // 加载已有标签到显示区域
+            var selectedTagsEl = document.getElementById('selectedTags');
+            selectedTagsEl.innerHTML = '';
+            var tags = article.tags || [];
+            tags.forEach(function(tag) {
+                var tagItem = document.createElement('span');
+                tagItem.className = 'tag-item';
+                tagItem.innerHTML = tag + '<span class="remove-tag" onclick="removeTag(this, \'' + tag + '\')">×</span>';
+                selectedTagsEl.appendChild(tagItem);
+            });
+
+            document.getElementById('articleModal').classList.add('active');
+            window.currentEditId = id;
+        }
+
+        // 移除标签
+        function removeTag(el, tag) {
+            el.parentElement.remove();
+        }
+
+        // 删除文章
+        function deleteArticleById(id) {
+            if (!confirm('确定要删除这篇文章吗？此操作不可恢复。')) return;
+            blogData.articles = blogData.articles.filter(function(a) { return a.id !== id; });
+            storage.set('blog_articles', blogData.articles);
+            renderArticlesTable();
+            alert('文章已删除');
+        }
+
+        // 保存文章
+        function saveArticle(publish) {
+            var title = document.getElementById('articleTitle').value.trim();
+            if (!title) { alert('请输入文章标题'); return; }
+
+            var category = document.getElementById('articleCategory').value;
+            var date = document.getElementById('articleDate').value;
+            var excerpt = document.getElementById('articleExcerpt').value.trim();
+            var content = document.getElementById('articleContent').value;
+            var pinned = document.getElementById('articlePinned').checked;
+            var published = publish ? true : document.getElementById('articlePublished').checked;
+
+            // 获取选中的标签
+            var selectedTags = [];
+            var tagElements = document.querySelectorAll('#selectedTags .tag-item');
+            tagElements.forEach(function(el) {
+                selectedTags.push(el.textContent.replace('×', '').trim());
+            });
+
+            var filename = title.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.md';
+
+            if (window.currentEditId) {
+                var index = blogData.articles.findIndex(function(a) { return a.id === window.currentEditId; });
+                if (index !== -1) {
+                    blogData.articles[index] = Object.assign(blogData.articles[index], {
+                        title: title, category: category, date: date, excerpt: excerpt,
+                        content: content, filePath: 'articles/' + filename, tags: selectedTags,
+                        pinned: pinned, published: published
+                    });
+                }
+            } else {
+                blogData.articles.push({
+                    id: generateId(), title: title, category: category, date: date,
+                    excerpt: excerpt, content: content, filePath: 'articles/' + filename,
+                    tags: selectedTags, pinned: pinned, published: published, views: 0, likes: 0
+                });
+            }
+
+            storage.set('blog_articles', blogData.articles);
+            document.getElementById('articleModal').classList.remove('active');
+            renderArticlesTable();
+            window.currentEditId = null;
+            alert(window.currentEditId ? '文章已更新' : '文章已发布');
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('articleModal').classList.remove('active');
+            window.currentEditId = null;
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('active');
+        }
+
+        // 显示预览
+        function showPreview() {
+            var title = document.getElementById('articleTitle').value || '无标题';
+            var content = document.getElementById('articleContent').value || '';
+            var category = document.getElementById('articleCategory');
+            var categoryName = category.options[category.selectedIndex].text;
+            var date = document.getElementById('articleDate').value || new Date().toISOString().split('T')[0];
+
+            var html = '<h1>' + escapeHtml(title) + '</h1>';
+            html += '<div class="meta">';
+            html += '<span><i class="fas fa-folder"></i> ' + categoryName + '</span>';
+            html += '<span><i class="far fa-calendar"></i> ' + date + '</span>';
+            html += '</div>';
+            html += '<div class="content">' + (window.marked ? window.marked.parse(content) : content.replace(/\n/g, '<br>')) + '</div>';
+
+            document.getElementById('previewContent').innerHTML = html;
+            document.getElementById('previewModal').classList.add('active');
+        }
+
+        // 关闭预览
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.remove('active');
+        }
+
+        // 关闭删除确认
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        // 清除所有数据
+        function clearAllData() {
+            storage.remove('blog_articles');
+            storage.remove('blog_categories');
+            blogData.articles = [];
+            blogData.categories = getDefaultCategories();
+            storage.set('blog_categories', blogData.categories);
+            renderArticlesTable();
+            renderCategorySelect();
+            alert('所有数据已清除');
+        }
+
+        // 导出文章
+        function exportArticles() {
+            if (blogData.articles.length === 0) { alert('没有可导出的文章'); return; }
+            alert('导出功能需要后端支持，请使用本地服务器');
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({ duration: 800, once: true, offset: 100, easing: 'ease-out-cubic' });
+            renderCategorySelect();
+            renderArticlesTable();
+
+            // 标签输入处理
+            var tagInput = document.getElementById('articleTags');
+            var selectedTags = document.getElementById('selectedTags');
+            if (tagInput && selectedTags) {
+                tagInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        var tag = this.value.trim();
+                        if (tag && !isTagExists(tag)) {
+                            addTag(tag);
+                            this.value = '';
+                        }
+                    }
+                });
+            }
+
+            // 拖拽上传事件
+            var dropZone = document.getElementById('dropZone');
+            if (dropZone) {
+                dropZone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                });
+                dropZone.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                });
+                dropZone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                    handleFileUpload(e.dataTransfer.files);
+                });
+                dropZone.addEventListener('click', function() {
+                    document.getElementById('fileInput').click();
+                });
+            }
+
+            console.log('页面初始化完成');
+        });
+    </script>
+
+    <script src="js/blog-admin.js"></script>
+
+    <!-- Markdown 解析器 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.0.3/marked.min.js"></script>
+    <!-- JSZip 用于导出 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- AOS 动画库 -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+</body>
+</html>
