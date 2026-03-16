@@ -7,64 +7,64 @@ class DataManager {
         this.blogDataFile = 'blog-data.json';
         this.ideasDataFile = 'ideas-data.json';
         this.commentsDataFile = 'comments.json';
+        this.jsonLoaded = false; // 标记是否成功从JSON加载
     }
 
     // 从JSON文件加载博客文章
     async loadBlogData() {
         try {
-            const response = await fetch(this.dataPath + this.blogDataFile);
+            const response = await fetch(this.dataPath + this.blogDataFile + '?t=' + Date.now()); // 添加时间戳防止缓存
             if (!response.ok) {
                 console.warn('无法加载博客数据文件，使用本地存储');
                 return storage.get('blog_articles') || [];
             }
             const data = await response.json();
-            console.log('从JSON文件加载博客数据:', data.length, '篇文章');
-
-            // 保存到本地存储作为缓存
-            storage.set('blog_articles', data);
-
-            return data;
+            if (data && data.length > 0) {
+                console.log('从JSON文件加载博客数据:', data.length, '篇文章');
+                this.jsonLoaded = true;
+                // 更新本地存储
+                storage.set('blog_articles', data);
+                return data;
+            }
         } catch (error) {
             console.warn('加载博客数据失败:', error);
-            return storage.get('blog_articles') || [];
         }
+        return storage.get('blog_articles') || [];
     }
 
     // 从JSON文件加载奇思妙想
     async loadIdeasData() {
         try {
-            const response = await fetch(this.dataPath + this.ideasDataFile);
+            const response = await fetch(this.dataPath + this.ideasDataFile + '?t=' + Date.now()); // 添加时间戳防止缓存
             if (!response.ok) {
                 console.warn('无法加载想法数据文件，使用本地存储');
                 return storage.get('ideas') || [];
             }
             const data = await response.json();
-            console.log('从JSON文件加载想法数据:', data.length, '条');
-
-            // 保存到本地存储作为缓存
-            storage.set('ideas', data);
-
-            return data;
+            if (data && data.length > 0) {
+                console.log('从JSON文件加载想法数据:', data.length, '条');
+                this.jsonLoaded = true;
+                // 更新本地存储
+                storage.set('ideas', data);
+                return data;
+            }
         } catch (error) {
             console.warn('加载想法数据失败:', error);
-            return storage.get('ideas') || [];
         }
+        return storage.get('ideas') || [];
     }
 
     // 从JSON文件加载评论
     async loadCommentsData() {
         try {
-            const response = await fetch(this.dataPath + this.commentsDataFile);
+            const response = await fetch(this.dataPath + this.commentsDataFile + '?t=' + Date.now());
             if (!response.ok) {
                 console.warn('无法加载评论数据文件，使用本地存储');
                 return storage.get('idea_comments') || {};
             }
             const data = await response.json();
             console.log('从JSON文件加载评论数据');
-
-            // 保存到本地存储
             storage.set('idea_comments', data.ideas || {});
-
             return data;
         } catch (error) {
             console.warn('加载评论数据失败:', error);

@@ -21,7 +21,15 @@ class IdeasManager {
         }
 
         // 回退到localStorage
-        return storage.get('ideas') || this.getDefaultIdeas();
+        const localData = storage.get('ideas');
+        if (localData && localData.length > 0) {
+            console.log('使用本地存储数据:', localData.length, '条想法');
+            return localData;
+        }
+
+        // 最后才使用默认数据
+        console.log('使用默认示例数据');
+        return this.getDefaultIdeas();
     }
 
     getDefaultIdeas() {

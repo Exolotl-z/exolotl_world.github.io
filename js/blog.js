@@ -30,7 +30,7 @@ class BlogManager {
         if (typeof dataManager !== 'undefined') {
             const jsonData = await dataManager.loadBlogData();
             if (jsonData && jsonData.length > 0) {
-                console.log('使用JSON文件数据:', jsonData.length, '篇文章');
+                console.log('使用JSON文件博客数据:', jsonData.length, '篇文章');
                 return jsonData.filter(article => article.published !== false);
             }
         }
