@@ -24,8 +24,14 @@
                 <li><a href="index.html" class="nav-link">首页</a></li>
                 <li><a href="blog.html" class="nav-link">博客</a></li>
                 <li><a href="ideas.html" class="nav-link active">奇思妙想</a></li>
-                <li><a href="dashboard.html" class="nav-link">数据面板</a></li>
+                <li><a href="about.html" class="nav-link">关于我</a></li>
             </ul>
+            <div class="nav-auth" id="navAuth">
+                <button class="auth-btn" id="authBtn">
+                    <i class="fas fa-user"></i>
+                    <span>登录</span>
+                </button>
+            </div>
             <div class="nav-toggle" id="navToggle">
                 <i class="fas fa-bars"></i>
             </div>
@@ -108,6 +114,64 @@
         </div>
     </div>
 
+    <!-- 想法详情模态框 -->
+    <div class="modal" id="detailModal">
+        <div class="modal-overlay" id="detailModalOverlay"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="detailTitle">想法标题</h2>
+                <button class="modal-close" id="detailModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-meta">
+                    <span class="detail-date" id="detailDate">
+                        <i class="far fa-calendar"></i>
+                        <span></span>
+                    </span>
+                    <div class="detail-tags" id="detailTags"></div>
+                </div>
+                <div class="detail-content" id="detailContent"></div>
+                <div class="detail-actions">
+                    <button class="action-btn like-btn" id="detailLikeBtn">
+                        <i class="far fa-heart"></i>
+                        <span id="detailLikeCount">0</span>
+                        点赞
+                    </button>
+                    <button class="action-btn share-btn" id="detailShareBtn">
+                        <i class="fas fa-share-alt"></i>
+                        分享
+                    </button>
+                </div>
+                <div class="detail-admin-actions" id="detailAdminActions" style="display: none;">
+                    <button class="action-btn edit-btn" id="detailEditBtn">
+                        <i class="fas fa-edit"></i>
+                        编辑
+                    </button>
+                    <button class="action-btn delete-btn" id="detailDeleteBtn">
+                        <i class="fas fa-trash"></i>
+                        删除
+                    </button>
+                </div>
+                <!-- 本地评论区 -->
+                <div class="comments-wrapper" id="commentsWrapper">
+                    <h4 class="comments-title">
+                        <i class="far fa-comments"></i>
+                        评论 <span id="commentCount">0</span>
+                    </h4>
+                    <div id="commentsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载更多指示器 -->
+    <div class="loading-more" id="loadingMore" style="display: none;">
+        <div class="loading"></div>
+        <span>加载中...</span>
+    </div>
+
     <footer class="footer">
         <div class="container">
             <p>万物皆虚，万物皆允</p>
@@ -123,5 +187,20 @@
     <script src="js/main.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/ideas.js"></script>
+
+    <!-- AOS 动画库 -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 100,
+                easing: 'ease-out-cubic'
+            });
+        });
+    </script>
+
 </body>
 </html>

@@ -179,6 +179,44 @@ body {
     color: var(--text-primary);
 }
 
+/* 导航栏认证按钮 */
+.nav-auth {
+    display: flex;
+    align-items: center;
+}
+
+.auth-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.auth-btn:hover {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border-color: var(--text-primary);
+}
+
+.auth-btn.logged-in {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border-color: var(--text-primary);
+}
+
+.auth-btn.logged-in:hover {
+    background: var(--text-secondary);
+    border-color: var(--text-secondary);
+}
+
 /* ===== 主内容区 ===== */
 .main-content {
     margin-top: 80px;
@@ -432,4 +470,272 @@ body {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* ===== 页面加载动画 ===== */
+@keyframes pageLoadFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pageLoadSlideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pageLoadSlideRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pageLoadScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 页面元素渐进式加载动画 */
+.main-content {
+    animation: pageLoadFadeIn 0.6s ease-out;
+}
+
+/* 卡片元素渐进式加载 */
+.card, .action-card, .sidebar-card, .ideas-card {
+    animation: pageLoadFadeIn 0.5s ease-out backwards;
+}
+
+/* 按钮悬停动效 */
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* 卡片悬停动效增强 */
+.card:hover, .action-card:hover, .sidebar-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* 导航栏滚动动效 */
+.navbar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 链接悬停下划线动画 */
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--text-primary);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::before,
+.nav-link.active::before {
+    width: 80%;
+}
+
+/* 回到顶部按钮动效 */
+.back-to-top {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.back-to-top:hover {
+    transform: translateY(-5px);
+}
+
+.back-to-top.visible {
+    animation: pageLoadSlideRight 0.3s ease-out;
+}
+
+/* 模态框动画 */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    opacity: 1;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    animation: modalOverlayFadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    position: relative;
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal.active .modal-content {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalOverlayFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Toast 提示动画 */
+.toast {
+    animation: toastSlideIn 0.3s ease-out;
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* AOS动画增强 */
+[data-aos="fade-up"], [data-aos="fade-down"], [data-aos="fade-left"], [data-aos="fade-right"] {
+    transition-duration: 0.6s !important;
+}
+
+[data-aos="zoom-in"] {
+    transition-duration: 0.5s !important;
+}
+
+/* 输入框焦点动画 */
+.form-input, .form-textarea, .filter-select {
+    transition: all 0.2s ease;
+}
+
+.form-input:focus, .form-textarea:focus, .filter-select:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 标签悬停效果 */
+.tag, .filter-tag, .suggested-tag {
+    transition: all 0.2s ease;
+}
+
+.tag:hover, .filter-tag:hover, .suggested-tag:hover {
+    transform: scale(1.05);
+}
+
+/* 技能标签云动画 */
+.skill-tag {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.skill-tag:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+/* 社交链接动画 */
+.social-link {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.social-link:hover {
+    transform: translateY(-4px) scale(1.1);
+}
+
+/* 进度条动画 */
+.reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--text-primary);
+    z-index: 10001;
+    transition: width 0.1s linear;
+    animation: progressGrow 0.3s ease-out;
+}
+
+@keyframes progressGrow {
+    from {
+        width: 0;
+    }
 }

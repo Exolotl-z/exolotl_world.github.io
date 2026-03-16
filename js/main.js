@@ -96,8 +96,8 @@ function throttle(func, limit) {
     };
 }
 
-// 本地存储工具
-const storage = {
+// 本地存储工具 - 暴露为全局变量
+window.storage = {
     get(key) {
         try {
             const item = localStorage.getItem(key);
@@ -107,7 +107,7 @@ const storage = {
             return null;
         }
     },
-    
+
     set(key, value) {
         try {
             localStorage.setItem(key, JSON.stringify(value));
@@ -117,7 +117,7 @@ const storage = {
             return false;
         }
     },
-    
+
     remove(key) {
         try {
             localStorage.removeItem(key);
@@ -127,6 +127,11 @@ const storage = {
             return false;
         }
     }
+};
+
+// 生成ID的工具函数
+window.generateId = function() {
+    return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 };
 
 // 时间格式化
@@ -180,6 +185,11 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
         observer.observe(el);
     });
+
+    // 初始化导航栏登录按钮
+    if (typeof auth !== 'undefined') {
+        auth.updateNavAuthButton();
+    }
 });
 
 // 错误边界处理

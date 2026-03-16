@@ -1,384 +1,408 @@
 // ===== 博客页面功能 =====
 
-// 从本地存储获取分类数据
-function getCategoriesData() {
-    const defaultCategories = [
-        { id: 'frontend', name: '前端开发', icon: 'fa-palette' },
-        { id: 'backend', name: '后端开发', icon: 'fa-server' },
-        { id: 'design', name: 'UI/UX设计', icon: 'fa-paint-brush' },
-        { id: 'tutorial', name: '教程', icon: 'fa-book' },
-        { id: 'other', name: '其他', icon: 'fa-folder' }
-    ];
-    return storage.get('blog_categories') || defaultCategories;
-}
-
-// 从本地存储获取文章数据
-function getArticlesData() {
-    const storedArticles = storage.get('blog_articles') || [];
-    // 只返回已发布的文章
-    return storedArticles.filter(article => article.published);
-}
-
-const categoriesData = getCategoriesData();
-const articlesData = getArticlesData();
-
-let currentCategory = 'all';
-let searchQuery = '';
-
-// 阅读进度条
-const readingProgress = document.getElementById('readingProgress');
-
-window.addEventListener('scroll', throttle(() => {
-    const windowHeight = window.innerHeight;
-    const fullHeight = document.documentElement.scrollHeight;
-    const scrolled = window.scrollY;
-    const progress = (scrolled / (fullHeight - windowHeight)) * 100;
-    
-    if (readingProgress) {
-        readingProgress.style.transform = `scaleX(${progress / 100})`;
+class BlogManager {
+    constructor() {
+        this.articles = [];
+        this.categories = this.getCategories();
+        this.currentCategory = 'all';
+        this.searchQuery = '';
+        this.pageSize = 10;
+        this.currentPage = 1;
+        this.init();
     }
-}, 16));
 
-// 分类筛选
-const categoryButtons = document.querySelectorAll('.category-item');
-categoryButtons.forEach(button => {
-    button.addEventListener('click', function() {
-        // 移除所有active类
-        categoryButtons.forEach(btn => btn.classList.remove('active'));
-        // 添加active类到当前按钮
-        this.classList.add('active');
-        
-        // 获取选中的分类
-        currentCategory = this.dataset.category;
-        
-        // 筛选文章
-        filterArticles();
-    });
-});
-
-// 搜索功能
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
-    searchInput.addEventListener('input', debounce(function() {
-        searchQuery = this.value.toLowerCase().trim();
-        filterArticles();
-    }, 300));
-}
-
-// 筛选文章
-function filterArticles() {
-    const articleCards = document.querySelectorAll('.article-card');
-    const emptyState = document.getElementById('emptyState');
-    let visibleCount = 0;
-    
-    articleCards.forEach(card => {
-        const category = card.dataset.category;
-        const title = card.querySelector('.article-title').textContent.toLowerCase();
-        const excerpt = card.querySelector('.article-excerpt').textContent.toLowerCase();
-        const tags = Array.from(card.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
-        
-        // 分类筛选
-        const categoryMatch = currentCategory === 'all' || category === currentCategory;
-        
-        // 搜索筛选
-        const searchMatch = !searchQuery || 
-            title.includes(searchQuery) || 
-            excerpt.includes(searchQuery) ||
-            tags.some(tag => tag.includes(searchQuery));
-        
-        if (categoryMatch && searchMatch) {
-            card.style.display = 'block';
-            card.style.animation = 'fadeIn 0.5s ease-out';
-            visibleCount++;
-        } else {
-            card.style.display = 'none';
-        }
-    });
-    
-    // 显示/隐藏空状态
-    if (emptyState) {
-        if (visibleCount === 0) {
-            emptyState.style.display = 'block';
-        } else {
-            emptyState.style.display = 'none';
-        }
+    // 获取分类
+    getCategories() {
+        const defaultCategories = [
+            { id: 'frontend', name: '前端开发', icon: 'fa-palette', count: 0 },
+            { id: 'backend', name: '后端开发', icon: 'fa-server', count: 0 },
+            { id: 'devops', name: 'DevOps', icon: 'fa-cloud', count: 0 },
+            { id: 'ai', name: '人工智能', icon: 'fa-robot', count: 0 },
+            { id: 'other', name: '其他', icon: 'fa-folder', count: 0 }
+        ];
+        const stored = storage.get('blog_categories');
+        return stored || defaultCategories;
     }
-}
 
-// 渲染文章列表
-function renderArticles() {
-    const articlesGrid = document.getElementById('articlesGrid');
-    const emptyState = document.getElementById('emptyState');
-    const articles = getArticlesData();
-    
-    if (articles.length === 0) {
-        articlesGrid.innerHTML = '';
-        if (emptyState) emptyState.style.display = 'block';
-        return;
+    // 获取文章（从localStorage和IndexedDB）
+    async getArticles() {
+        const metadata = storage.get('blog_articles') || [];
+        console.log('从存储获取的文章元数据:', metadata);
+
+        // 从IndexedDB加载文章内容
+        const articlesWithContent = await this.loadArticlesContent(metadata);
+        return articlesWithContent.filter(article => article.published);
     }
-    
-    if (emptyState) emptyState.style.display = 'none';
-    
-    // 使用动态分类数据
-    const categoryMap = {};
-    categoriesData.forEach(cat => {
-        categoryMap[cat.id] = { name: cat.name, icon: cat.icon };
-    });
-    
-    articlesGrid.innerHTML = articles.map(article => {
-        const category = categoryMap[article.category] || { name: article.category, icon: 'fa-folder' };
-        
-        return `
-        <article class="article-card" data-category="${article.category}">
-            <div class="article-header">
-                <div class="article-meta">
-                    <span class="article-category">
-                        <i class="fas ${category.icon}"></i>
-                        ${category.name}
-                    </span>
-                    <span class="article-date">
-                        <i class="far fa-calendar"></i>
-                        ${article.date}
-                    </span>
-                </div>
-            </div>
-            <div class="article-content">
-                <h2 class="article-title">
-                    <a href="article.html?id=${article.id}">${escapeHtml(article.title)}</a>
-                </h2>
-                <p class="article-excerpt">
-                    ${escapeHtml(article.excerpt)}
-                </p>
-                <div class="article-tags">
-                    ${article.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
-                </div>
-            </div>
-            <div class="article-footer">
-                <div class="article-stats">
-                    <span><i class="far fa-eye"></i> ${formatNumber(article.views || 0)}</span>
-                    <span><i class="far fa-heart"></i> ${article.likes || 0}</span>
-                    <span><i class="far fa-comment"></i> ${article.comments || 0}</span>
-                </div>
-                <a href="article.html?id=${article.id}" class="read-more">
-                    阅读更多
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-        </article>
-    `;
-    }).join('');
-}
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+    // 从IndexedDB加载文章内容
+    async loadArticlesContent(articles) {
+        if (typeof indexedDB === 'undefined') return articles;
 
-function formatNumber(num) {
-    if (num >= 1000) {
-        return (num / 1000).toFixed(1) + 'k';
-    }
-    return num.toString();
-}
+        return new Promise((resolve) => {
+            const request = indexedDB.open('BlogStorage', 1);
 
-// 标签点击
-const tagItems = document.querySelectorAll('.tag-item');
-tagItems.forEach(tag => {
-    tag.addEventListener('click', function() {
-        searchQuery = this.textContent.toLowerCase();
-        if (searchInput) {
-            searchInput.value = this.textContent;
-        }
-        filterArticles();
-    });
-});
+            request.onerror = () => resolve(articles);
 
-// 文章卡片悬停效果增强
-const articleCards = document.querySelectorAll('.article-card');
-articleCards.forEach(card => {
-    card.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-8px)';
-    });
-    
-    card.addEventListener('mouseleave', function() {
-        this.style.transform = '';
-    });
-});
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('articles')) {
+                    db.createObjectStore('articles', { keyPath: 'filename' });
+                }
+            };
 
-// 统计信息动画
-function animateStats() {
-    const stats = document.querySelectorAll('.article-stats span');
-    stats.forEach(stat => {
-        stat.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.1)';
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction(['articles'], 'readonly');
+                const store = transaction.objectStore('articles');
+                const getAllRequest = store.getAll();
+
+                getAllRequest.onsuccess = () => {
+                    const files = getAllRequest.result;
+                    const fileMap = {};
+                    files.forEach(f => fileMap[f.filename] = f.content);
+
+                    // 将内容合并到元数据
+                    const articlesWithContent = articles.map(article => {
+                        if (article.filePath) {
+                            const filename = article.filePath.replace('articles/', '');
+                            const content = fileMap[filename];
+                            console.log('查找文章:', article.title, 'filename:', filename, 'content长度:', content ? content.length : 0);
+                            return {
+                                ...article,
+                                content: content || article.content || ''
+                            };
+                        }
+                        console.log('文章无filePath:', article.title);
+                        return article;
+                    });
+
+                    console.log('加载文章内容后的数据:', articlesWithContent);
+                    resolve(articlesWithContent);
+                };
+
+                getAllRequest.onerror = () => resolve(articles);
+            };
         });
-        
-        stat.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-        });
-    });
-}
+    }
 
-// 懒加载图片（如果有的话）
-function lazyLoadImages() {
-    const images = document.querySelectorAll('img[data-src]');
-    const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.removeAttribute('data-src');
-                imageObserver.unobserve(img);
+    // 初始化
+    async init() {
+        this.articles = await this.getArticles();
+        this.renderStats();
+        this.renderCategories();
+        this.renderTags();
+        this.renderArticles();
+        this.attachEvents();
+        this.checkAdmin();
+    }
+
+    // 检查管理员权限
+    checkAdmin() {
+        if (typeof auth !== 'undefined' && auth.isAuthenticated()) {
+            const adminCard = document.getElementById('adminCard');
+            if (adminCard) {
+                adminCard.style.display = 'block';
             }
-        });
-    });
-    
-    images.forEach(img => imageObserver.observe(img));
-}
-
-// 无限滚动加载（可选功能）
-let page = 1;
-let isLoading = false;
-
-function loadMoreArticles() {
-    if (isLoading) return;
-    
-    const articlesGrid = document.getElementById('articlesGrid');
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const threshold = document.documentElement.scrollHeight - 500;
-    
-    if (scrollPosition >= threshold) {
-        isLoading = true;
-        
-        // 模拟加载更多文章
-        setTimeout(() => {
-            console.log(`加载第 ${++page} 页文章`);
-            isLoading = false;
-        }, 1000);
+        }
     }
-}
 
-// window.addEventListener('scroll', throttle(loadMoreArticles, 200));
+    // 渲染统计信息
+    renderStats() {
+        const articleCount = document.getElementById('articleCount');
+        const categoryCount = document.getElementById('categoryCount');
+        const tagCount = document.getElementById('tagCount');
 
-// 分享文章
-function shareArticle(articleId) {
-    const article = articlesData.find(a => a.id === articleId);
-    
-    if (navigator.share) {
-        navigator.share({
-            title: article.title,
-            text: article.excerpt,
-            url: window.location.href
-        }).catch(err => console.log('分享失败', err));
-    } else {
-        // 复制链接到剪贴板
-        const url = `${window.location.origin}/article.html?id=${articleId}`;
-        navigator.clipboard.writeText(url).then(() => {
-            alert('链接已复制到剪贴板');
-        });
+        if (articleCount) articleCount.textContent = this.articles.length;
+
+        const activeCategories = [...new Set(this.articles.map(a => a.category))];
+        if (categoryCount) categoryCount.textContent = activeCategories.length;
+
+        const allTags = this.articles.flatMap(a => a.tags || []);
+        const uniqueTags = [...new Set(allTags)];
+        if (tagCount) tagCount.textContent = uniqueTags.length;
     }
-}
 
-// 渲染分类筛选器
-function renderCategoryFilters() {
-    const categoryFilters = document.querySelector('.category-filters');
-    if (!categoryFilters) return;
+    // 渲染分类列表
+    renderCategories() {
+        const categoryTree = document.getElementById('categoryTree');
+        const filterTags = document.getElementById('filterTags');
+        if (!categoryTree) return;
 
-    // 清空现有的筛选器
-    categoryFilters.innerHTML = '';
-
-    // 添加“全部”选项
-    const allFilter = document.createElement('button');
-    allFilter.className = 'category-filter active';
-    allFilter.dataset.category = 'all';
-    allFilter.innerHTML = '<i class="fas fa-th"></i> 全部';
-    categoryFilters.appendChild(allFilter);
-
-    // 添加其他分类
-    categoriesData.forEach(cat => {
-        const filter = document.createElement('button');
-        filter.className = 'category-filter';
-        filter.dataset.category = cat.id;
-        filter.innerHTML = `<i class="fas ${cat.icon}"></i> ${cat.name}`;
-        categoryFilters.appendChild(filter);
-    });
-
-    // 添加点击事件
-    attachCategoryFilterEvents();
-}
-
-// 附加分类筛选器事件
-function attachCategoryFilterEvents() {
-    const categoryFilters = document.querySelectorAll('.category-filter, .category-item');
-    
-    categoryFilters.forEach(filter => {
-        filter.addEventListener('click', () => {
-            const category = filter.dataset.category;
-            currentCategory = category;
-            
-            // 更新激活状态
-            categoryFilters.forEach(f => f.classList.remove('active'));
-            filter.classList.add('active');
-            
-            // 筛选文章
-            filterArticles();
+        // 统计每个分类的文章数
+        const categoryCounts = {};
+        this.articles.forEach(article => {
+            categoryCounts[article.category] = (categoryCounts[article.category] || 0) + 1;
         });
-    });
-}
 
-// 渲染热门标签
-function renderPopularTags() {
-    const popularTagsEl = document.getElementById('popularTags');
-    if (!popularTagsEl) return;
+        // 更新分类数据
+        this.categories.forEach(cat => {
+            cat.count = categoryCounts[cat.id] || 0;
+        });
 
-    // 统计所有标签出现次数
-    const tagCounts = {};
-    articlesData.forEach(article => {
-        if (article.tags && Array.isArray(article.tags)) {
-            article.tags.forEach(tag => {
+        // 渲染分类树
+        categoryTree.innerHTML = `
+            <li class="category-item">
+                <a class="category-link active" data-category="all">
+                    <span><i class="fas fa-th"></i> 全部文章</span>
+                    <span class="count">${this.articles.length}</span>
+                </a>
+            </li>
+            ${this.categories.map(cat => `
+                <li class="category-item">
+                    <a class="category-link" data-category="${cat.id}">
+                        <span><i class="fas ${cat.icon}"></i> ${cat.name}</span>
+                        <span class="count">${cat.count}</span>
+                    </a>
+                </li>
+            `).join('')}
+        `;
+
+        // 渲染筛选标签
+        if (filterTags) {
+            filterTags.innerHTML = `
+                <button class="filter-tag active" data-category="all">全部</button>
+                ${this.categories.map(cat => `
+                    <button class="filter-tag" data-category="${cat.id}">${cat.name}</button>
+                `).join('')}
+            `;
+        }
+    }
+
+    // 渲染标签云
+    renderTags() {
+        const tagCloud = document.getElementById('tagCloud');
+        if (!tagCloud) return;
+
+        // 统计标签出现次数
+        const tagCounts = {};
+        this.articles.forEach(article => {
+            (article.tags || []).forEach(tag => {
                 tagCounts[tag] = (tagCounts[tag] || 0) + 1;
             });
+        });
+
+        // 排序并取前15个
+        const sortedTags = Object.entries(tagCounts)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 15);
+
+        if (sortedTags.length === 0) {
+            tagCloud.innerHTML = '<p style="font-size: 0.875rem; color: var(--text-light);">暂无标签</p>';
+            return;
         }
-    });
 
-    // 按出现次数排序，取前10个
-    const sortedTags = Object.entries(tagCounts)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10)
-        .map(([tag]) => tag);
-
-    if (sortedTags.length === 0) {
-        popularTagsEl.innerHTML = '<p style="font-size: 0.875rem; color: var(--text-light);">暂无标签</p>';
-        return;
+        tagCloud.innerHTML = sortedTags.map(([tag, count]) =>
+            `<a class="tag-link" data-tag="${this.escapeHtml(tag)}">${this.escapeHtml(tag)}</a>`
+        ).join('');
     }
 
-    popularTagsEl.innerHTML = sortedTags.map(tag => 
-        `<span class="tag-item" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</span>`
-    ).join('');
+    // 渲染文章列表
+    renderArticles() {
+        const articlesList = document.getElementById('articlesList');
+        const emptyState = document.getElementById('emptyState');
+        const loadMore = document.getElementById('loadMore');
 
-    // 添加点击事件
-    popularTagsEl.querySelectorAll('.tag-item').forEach(el => {
-        el.addEventListener('click', () => {
-            const tag = el.dataset.tag;
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.value = tag;
-                searchQuery = tag.toLowerCase();
-                filterArticles();
-            }
+        if (!articlesList) return;
+
+        // 筛选文章
+        let filteredArticles = this.filterArticles();
+
+        // 排序：置顶 > 日期
+        filteredArticles.sort((a, b) => {
+            if (a.pinned && !b.pinned) return -1;
+            if (!a.pinned && b.pinned) return 1;
+            return new Date(b.date) - new Date(a.date);
         });
-    });
+
+        if (filteredArticles.length === 0) {
+            articlesList.innerHTML = '';
+            if (emptyState) emptyState.style.display = 'block';
+            if (loadMore) loadMore.style.display = 'none';
+            return;
+        }
+
+        if (emptyState) emptyState.style.display = 'none';
+
+        // 只显示当前页的文章
+        const start = (this.currentPage - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        const pageArticles = filteredArticles.slice(start, end);
+
+        // 显示加载更多按钮
+        if (loadMore) {
+            loadMore.style.display = end < filteredArticles.length ? 'block' : 'none';
+        }
+
+        // 渲染文章卡片
+        articlesList.innerHTML = pageArticles.map((article, index) => {
+            const category = this.categories.find(c => c.id === article.category) || { name: article.category, icon: 'fa-folder' };
+            const date = new Date(article.date);
+            const formattedDate = date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            return `
+                <article class="article-card" data-category="${article.category}" data-id="${article.id}" style="animation-delay: ${index * 0.1}s">
+                    <div class="article-header">
+                        <span class="article-category">
+                            <i class="fas ${category.icon}"></i>
+                            ${category.name}
+                        </span>
+                        <span class="article-date">
+                            <i class="far fa-calendar"></i>
+                            ${formattedDate}
+                        </span>
+                    </div>
+                    <h2 class="article-title">
+                        <a href="article.html?id=${article.id}">${this.escapeHtml(article.title)}</a>
+                    </h2>
+                    <p class="article-excerpt">${this.escapeHtml(article.excerpt || '')}</p>
+                    <div class="article-footer">
+                        <div class="article-tags">
+                            ${(article.tags || []).slice(0, 5).map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
+                        </div>
+                        <a href="article.html?id=${article.id}" class="read-more-link">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </article>
+            `;
+        }).join('');
+
+        // 更新统计
+        this.renderStats();
+    }
+
+    // 筛选文章
+    filterArticles() {
+        return this.articles.filter(article => {
+            // 分类筛选
+            const categoryMatch = this.currentCategory === 'all' || article.category === this.currentCategory;
+
+            // 搜索筛选
+            const searchLower = this.searchQuery.toLowerCase();
+            const searchMatch = !this.searchQuery ||
+                article.title.toLowerCase().includes(searchLower) ||
+                (article.excerpt || '').toLowerCase().includes(searchLower) ||
+                (article.tags || []).some(tag => tag.toLowerCase().includes(searchLower));
+
+            return categoryMatch && searchMatch;
+        });
+    }
+
+    // 附加事件
+    attachEvents() {
+        // 搜索
+        const searchInput = document.getElementById('searchInput');
+        const searchClear = document.getElementById('searchClear');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', this.debounce((e) => {
+                this.searchQuery = e.target.value.trim();
+                this.currentPage = 1;
+                this.renderArticles();
+
+                if (searchClear) {
+                    searchClear.style.display = this.searchQuery ? 'block' : 'none';
+                }
+            }, 300));
+        }
+
+        if (searchClear) {
+            searchClear.addEventListener('click', () => {
+                this.searchQuery = '';
+                searchInput.value = '';
+                searchClear.style.display = 'none';
+                this.currentPage = 1;
+                this.renderArticles();
+            });
+        }
+
+        // 分类筛选 - 侧边栏
+        const categoryTree = document.getElementById('categoryTree');
+        if (categoryTree) {
+            categoryTree.addEventListener('click', (e) => {
+                const link = e.target.closest('.category-link');
+                if (!link) return;
+
+                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                this.currentCategory = link.dataset.category;
+                this.currentPage = 1;
+                this.renderArticles();
+            });
+        }
+
+        // 分类筛选 - 顶部标签
+        const filterTags = document.getElementById('filterTags');
+        if (filterTags) {
+            filterTags.addEventListener('click', (e) => {
+                const tag = e.target.closest('.filter-tag');
+                if (!tag) return;
+
+                document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                tag.classList.add('active');
+
+                // 同时更新侧边栏
+                document.querySelectorAll('.category-link').forEach(l => {
+                    l.classList.toggle('active', l.dataset.category === tag.dataset.category);
+                });
+
+                this.currentCategory = tag.dataset.category;
+                this.currentPage = 1;
+                this.renderArticles();
+            });
+        }
+
+        // 标签云点击
+        const tagCloud = document.getElementById('tagCloud');
+        if (tagCloud) {
+            tagCloud.addEventListener('click', (e) => {
+                const link = e.target.closest('.tag-link');
+                if (!link) return;
+
+                this.searchQuery = link.dataset.tag;
+                if (searchInput) searchInput.value = link.dataset.tag;
+                if (searchClear) searchClear.style.display = 'block';
+                this.currentPage = 1;
+                this.renderArticles();
+            });
+        }
+
+        // 加载更多
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', () => {
+                this.currentPage++;
+                this.renderArticles();
+                window.scrollTo({
+                    top: document.body.scrollHeight - 500,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    }
+
+    // 工具函数
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    debounce(fn, delay) {
+        let timer;
+        return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
 }
 
-// 页面加载完成
+// 初始化
 document.addEventListener('DOMContentLoaded', () => {
-    renderCategoryFilters();
-    renderArticles();
-    renderPopularTags();
-    animateStats();
-    lazyLoadImages();
-    
+    window.blogManager = new BlogManager();
     console.log('博客页面加载完成');
-    console.log(`共有 ${articlesData.length} 篇文章`);
 });
+
+// 导出以便其他模块使用
+window.BlogManager = BlogManager;

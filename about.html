@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="关于我 - 我的个人网站">
+    <title>关于我 - 我的个人网站</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/about.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <i class="fas fa-code"></i>
+                    <span>我的空间</span>
+                </a>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="blog.html" class="nav-link">博客</a></li>
+                <li><a href="ideas.html" class="nav-link">奇思妙想</a></li>
+                <li><a href="about.html" class="nav-link active">关于我</a></li>
+            </ul>
+            <div class="nav-auth" id="navAuth">
+                <button class="auth-btn" id="authBtn">
+                    <i class="fas fa-user"></i>
+                    <span>登录</span>
+                </button>
+            </div>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="about-main">
+        <!-- 个人简介卡片 -->
+        <section class="about-hero">
+            <div class="container">
+                <div class="hero-content" data-aos="fade-up">
+                    <div class="hero-avatar" id="heroAvatar">
+                        <img src="images/avatar.jpg" alt="我的头像">
+                    </div>
+                    <div class="hero-info">
+                        <h1 class="hero-name">你好，我是 <span class="highlight">exolotl</span></h1>
+                        <p class="hero-tagline">创造力至上 | ADHD引擎人 | intp</p>
+                        <p class="hero-description">
+                            欢迎您来了解我，感谢您和我一样对一切的好奇在改变这个世界。
+                            希望我们的生命走到尽头时，把好玩的东西都玩过了。
+                        </p>
+                        <div class="hero-social">
+                            <a href="https://github.com/Exolotl-z" target="_blank" class="social-link" data-aos="fade-up" data-aos-delay="100">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="https://www.xiaohongshu.com/user/profile/63d541810000000026010ae7" target="_blank" class="social-link" data-aos="fade-up" data-aos-delay="200">
+                                <i class="fas fa-book"></i>
+                            </a>
+                            <a href="mailto:Eoxlotl@outlook.com" class="social-link" data-aos="fade-up" data-aos-delay="300">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-decoration">
+                <div class="decoration-circle circle-1"></div>
+                <div class="decoration-circle circle-2"></div>
+                <div class="decoration-circle circle-3"></div>
+            </div>
+        </section>
+
+        <!-- 成长轨迹 -->
+        <section class="about-timeline-section">
+            <div class="container">
+                <h2 class="section-title" data-aos="fade-up">
+                    <i class="fas fa-history"></i>
+                    轨迹
+                </h2>
+                <div class="timeline-horizontal">
+                    <div class="timeline-line-horizontal"></div>
+                    <div class="timeline-track" id="timelineTrack">
+                        <!-- 时间节点 1 -->
+                        <div class="timeline-node" data-aos="fade-up" data-aos-delay="100">
+                            <div class="node-dot">
+                                <span class="year-label">2077</span>
+                            </div>
+                            <div class="node-content">
+                                <h3>数字生命阶段</h3>
+                                <p>已接入大群，获得宇宙级统一</p>
+                                <div class="node-image">
+                                    <img src="images/5.jpg" alt="肉身苦短，思考永恒于存储设备">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 时间节点 2 -->
+                        <div class="timeline-node" data-aos="fade-up" data-aos-delay="200">
+                            <div class="node-dot">
+                                <span class="year-label">2025</span>
+                            </div>
+                            <div class="node-content">
+                                <h3>探索脑</h3>
+                                <p>哲学问题，和人为什么可以思考哲学问题</p>
+                                <div class="node-image">
+                                    <img src="images/4.jpg" alt="从出生就觉得有意思">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 时间节点 3 -->
+                        <div class="timeline-node" data-aos="fade-up" data-aos-delay="300">
+                            <div class="node-dot">
+                                <span class="year-label">2024</span>
+                            </div>
+                            <div class="node-content">
+                                <h3>iGEM</h3>
+                                <p>第一个完全自己思考和进行的项目</p>
+                                <div class="node-image">
+                                    <img src="images/3.jpg" alt="潦草但也意义重大">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 时间节点 4 -->
+                        <div class="timeline-node" data-aos="fade-up" data-aos-delay="400">
+                            <div class="node-dot">
+                                <span class="year-label">2022</span>
+                            </div>
+                            <div class="node-content">
+                                <h3>点亮的第一个灯</h3>
+                                <p>第一次自由地学自己想学的</p>
+                                <div class="node-image">
+                                    <img src="images/2.jpg" alt="点灯大师">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 时间节点 5 -->
+                        <div class="timeline-node" data-aos="fade-up" data-aos-delay="500">
+                            <div class="node-dot">
+                                <span class="year-label">2004</span>
+                            </div>
+                            <div class="node-content">
+                                <h3>出生于地球</h3>
+                                <p>人类数量+1</p>
+                                <div class="node-image">
+                                    <img src="images/1.jpg" alt="医生说这孩子长大会很人机哦">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 瞬间定格 -->
+        <section class="about-gallery-section">
+            <div class="container">
+                <h2 class="section-title" data-aos="fade-up">
+                    <i class="fas fa-images"></i>
+                    这里没有故事
+                </h2>
+                <div class="gallery-masonry" id="galleryMasonry">
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="100">
+                        <img src="images/15.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>在会议上催更年更up</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="150">
+                        <img src="images/13.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>怀念有moss的工作环境</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="250">
+                        <img src="images/7.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>包装设计外行勇闯比赛</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="200">
+                        <img src="images/16.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>此物的价格是eps32的十倍</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="250">
+                        <img src="images/8.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>最好吃的学术会议三明治</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="300">
+                        <img src="images/11.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>本人自拍照</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="350">
+                        <img src="images/9.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>在鲸鲨馆面对这蓝色坐了很久</span>
+                        </div>
+                    </div>
+                     <div class="gallery-item" data-aos="fade-up" data-aos-delay="300">
+                        <img src="images/18.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>买到车第一周就骑了100km，三年运动量</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="400">
+                        <img src="images/10.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>稳定位于体验最好的本首位</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="250">
+                        <img src="images/6.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>下辈子志愿是成为克猫猫</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="250">
+                        <img src="images/17.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>兔子是会繁殖的</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="450">
+                        <img src="images/14.jpg" alt="生活瞬间">
+                        <div class="gallery-overlay">
+                            <span>也许柯伊伯带和彩虹都是永恒</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>万物皆虚，万事皆允</p>
+            <p>登楼撤梯，见月忽指</p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop" aria-label="回到顶部">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- AOS 动画库 -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/about.js"></script>
+    <script>
+        // 初始化AOS动画
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 100,
+                easing: 'ease-out-cubic'
+            });
+        });
+    </script>
+</body>
+</html>

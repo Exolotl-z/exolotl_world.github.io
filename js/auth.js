@@ -6,6 +6,7 @@ class Auth {
         // 默认密码: "admin123"
         this.defaultPasswordHash = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9';
         this.sessionKey = 'auth_session';
+        this.rememberKey = 'auth_remember';
         this.passwordKey = 'auth_password_hash';
         this.sessionTimeout = 24 * 60 * 60 * 1000; // 24小时
     }
@@ -15,6 +16,15 @@ class Auth {
         const savedHash = localStorage.getItem(this.passwordKey);
         if (!savedHash) {
             localStorage.setItem(this.passwordKey, this.defaultPasswordHash);
+        }
+        // 检查URL参数，如果包含reset_password则重置密码
+        if (window.location.search.includes('reset_password')) {
+            localStorage.setItem(this.passwordKey, this.defaultPasswordHash);
+            localStorage.removeItem(this.rememberKey);
+            sessionStorage.removeItem(this.sessionKey);
+            // 清除URL参数
+            window.history.replaceState({}, document.title, window.location.pathname);
+            console.log('密码已重置为默认: admin123');
         }
     }
 
@@ -34,8 +44,8 @@ class Auth {
         return hash === savedHash;
     }
 
-    // 登录
-    async login(password) {
+    // 登录 - 支持记住登录状态
+    async login(password, remember = false) {
         const isValid = await this.verifyPassword(password);
         if (isValid) {
             const session = {
@@ -43,35 +53,72 @@ class Auth {
                 expires: Date.now() + this.sessionTimeout
             };
             sessionStorage.setItem(this.sessionKey, JSON.stringify(session));
+
+            // 如果选择记住登录状态，使用localStorage
+            if (remember) {
+                const rememberData = {
+                    timestamp: Date.now(),
+                    expires: Date.now() + (this.sessionTimeout * 7) // 7天
+                };
+                localStorage.setItem(this.rememberKey, JSON.stringify(rememberData));
+            }
+
             return true;
         }
         return false;
     }
 
-    // 检查是否已登录
+    // 检查是否已登录（包括记住的登录状态）
     isAuthenticated() {
+        // 先检查sessionStorage
         const sessionData = sessionStorage.getItem(this.sessionKey);
-        if (!sessionData) return false;
+        if (sessionData) {
+            try {
+                const session = JSON.parse(sessionData);
+                const now = Date.now();
 
-        try {
-            const session = JSON.parse(sessionData);
-            const now = Date.now();
-            
-            // 检查会话是否过期
-            if (now > session.expires) {
-                this.logout();
+                if (now > session.expires) {
+                    this.logout();
+                    return false;
+                }
+
+                return true;
+            } catch (e) {
                 return false;
             }
-            
-            return true;
-        } catch (e) {
-            return false;
         }
+
+        // 检查localStorage中的记住登录状态
+        const rememberData = localStorage.getItem(this.rememberKey);
+        if (rememberData) {
+            try {
+                const remember = JSON.parse(rememberData);
+                const now = Date.now();
+
+                if (now > remember.expires) {
+                    localStorage.removeItem(this.rememberKey);
+                    return false;
+                }
+
+                // 恢复sessionStorage
+                const session = {
+                    timestamp: Date.now(),
+                    expires: Date.now() + this.sessionTimeout
+                };
+                sessionStorage.setItem(this.sessionKey, JSON.stringify(session));
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     // 登出
     logout() {
         sessionStorage.removeItem(this.sessionKey);
+        localStorage.removeItem(this.rememberKey);
     }
 
     // 修改密码
@@ -112,7 +159,12 @@ class Auth {
                     <div class="auth-body">
                         <p class="auth-message">${message}</p>
                         <input type="password" id="authPassword" class="auth-input" placeholder="请输入密码" autocomplete="off">
-                        <p class="auth-hint">默认密码：admin123</p>
+                        <div class="auth-remember">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="authRemember">
+                                <span>7天内免登录</span>
+                            </label>
+                        </div>
                         <p class="auth-error" id="authError" style="display: none;"></p>
                     </div>
                     <div class="auth-footer">
@@ -135,6 +187,7 @@ class Auth {
             const submitBtn = document.getElementById('authSubmit');
             const handleSubmit = async () => {
                 const password = document.getElementById('authPassword').value;
+                const remember = document.getElementById('authRemember')?.checked || false;
                 const errorEl = document.getElementById('authError');
 
                 if (!password) {
@@ -146,7 +199,7 @@ class Auth {
                 submitBtn.disabled = true;
                 submitBtn.textContent = '验证中...';
 
-                const success = await this.login(password);
+                const success = await this.login(password, remember);
 
                 if (success) {
                     document.body.removeChild(overlay);
@@ -191,6 +244,44 @@ class Auth {
             }
         }
         return true;
+    }
+
+    // 更新导航栏登录按钮状态
+    updateNavAuthButton() {
+        const authBtn = document.getElementById('authBtn');
+        if (!authBtn) return;
+
+        if (this.isAuthenticated()) {
+            authBtn.classList.add('logged-in');
+            authBtn.innerHTML = `
+                <i class="fas fa-sign-out-alt"></i>
+                <span>登出</span>
+            `;
+            authBtn.title = '点击登出';
+        } else {
+            authBtn.classList.remove('logged-in');
+            authBtn.innerHTML = `
+                <i class="fas fa-user"></i>
+                <span>登录</span>
+            `;
+            authBtn.title = '点击登录';
+        }
+
+        // 点击事件处理
+        authBtn.onclick = () => {
+            if (this.isAuthenticated()) {
+                this.logout();
+                this.updateNavAuthButton();
+                // 刷新当前页面
+                window.location.reload();
+            } else {
+                this.showLoginDialog().then(success => {
+                    if (success) {
+                        this.updateNavAuthButton();
+                    }
+                });
+            }
+        };
     }
 }
 
@@ -286,6 +377,25 @@ style.textContent = `
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
+}
+
+.auth-remember {
+    margin-top: 1rem;
+}
+
+.auth-remember .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.auth-remember .checkbox-label input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }
 
 @keyframes slideInUp {

@@ -1,7 +1,234 @@
 // ===== 文章详情页功能 =====
 
-// 代码高亮初始化
-document.addEventListener('DOMContentLoaded', () => {
+// 本地存储工具 - 兼容处理
+const storage = window.storage || {
+    get(key) {
+        try {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : null;
+        } catch (e) { return null; }
+    },
+    set(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
+    }
+};
+
+// HTML转义函数
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// 加载文章内容
+async function loadArticleContent() {
+    // 获取URL中的文章ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const articleId = urlParams.get('id');
+
+    console.log('URL参数ID:', articleId);
+
+    if (!articleId) {
+        console.log('没有文章ID参数');
+        showNotFound();
+        return;
+    }
+
+    console.log('加载文章ID:', articleId);
+
+    // 从localStorage获取文章列表
+    const articles = storage.get('blog_articles') || [];
+    console.log('本地存储文章数:', articles.length);
+
+    // 使用宽松相等查找文章（处理类型不匹配）
+    const article = articles.find(a => a.id == articleId || a.id === articleId);
+
+    if (!article) {
+        console.log('未找到文章:', articleId);
+        console.log('可用文章IDs:', articles.map(a => a.id));
+        showNotFound();
+        return;
+    }
+
+    console.log('找到文章:', article.title);
+
+    // 从IndexedDB获取完整内容
+    let content = article.content || '';
+
+    if (!content && article.filePath && typeof indexedDB !== 'undefined') {
+        const filename = article.filePath.replace('articles/', '');
+        content = await loadFromIndexedDB(filename);
+    }
+
+    // 如果还是没有内容，尝试从摘要生成
+    if (!content && article.excerpt) {
+        content = article.excerpt + '\n\n---\n\n*文章内容正在加载中...*';
+    }
+
+    // 渲染文章内容
+    renderArticle(article, content);
+}
+
+// 显示未找到提示
+function showNotFound() {
+    const titleEl = document.getElementById('articleTitle');
+    if (titleEl) {
+        titleEl.textContent = '文章未找到';
+    }
+    const contentEl = document.getElementById('articleContent');
+    if (contentEl) {
+        contentEl.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-file-alt"></i>
+                <p>未找到该文章</p>
+                <a href="blog.html" class="back-link">返回博客</a>
+            </div>
+        `;
+    }
+}
+
+// 从IndexedDB加载内容
+function loadFromIndexedDB(filename) {
+    return new Promise((resolve) => {
+        if (typeof indexedDB === 'undefined') {
+            console.log('IndexedDB不可用');
+            resolve('');
+            return;
+        }
+
+        console.log('从IndexedDB加载文件:', filename);
+
+        const request = indexedDB.open('BlogStorage', 1);
+
+        request.onerror = () => {
+            console.error('IndexedDB打开失败');
+            resolve('');
+        };
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('articles')) {
+                db.createObjectStore('articles', { keyPath: 'filename' });
+            }
+        };
+
+        request.onsuccess = (event) => {
+            const db = event.target.result;
+            const transaction = db.transaction(['articles'], 'readonly');
+            const store = transaction.objectStore('articles');
+            const getRequest = store.get(filename);
+
+            getRequest.onsuccess = () => {
+                const result = getRequest.result;
+                console.log('IndexedDB查询结果:', result);
+                resolve(result ? result.content : '');
+            };
+
+            getRequest.onerror = () => {
+                console.error('IndexedDB查询失败');
+                resolve('');
+            };
+        };
+    });
+}
+
+// 渲染文章
+function renderArticle(article, content) {
+    console.log('渲染文章:', article.title, '内容长度:', content?.length || 0);
+
+    // 获取分类名称
+    const categories = storage.get('blog_categories') || [];
+    const categoryObj = categories.find(c => c.id === article.category);
+    const categoryName = categoryObj ? categoryObj.name : (article.category || '其他');
+
+    // 标题
+    const titleEl = document.getElementById('articleTitle');
+    if (titleEl) {
+        titleEl.textContent = article.title || '无标题';
+    }
+
+    // 更新页面标题
+    document.title = (article.title || '文章') + ' - 我的个人网站';
+
+    // 分类和日期
+    const metaEl = document.querySelector('.article-meta');
+    if (metaEl) {
+        const date = article.date ? new Date(article.date).toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }) : '未知日期';
+
+        const readTime = content ? Math.max(1, Math.ceil(content.length / 1000)) : 1;
+
+        metaEl.innerHTML = `
+            <span class="meta-item"><i class="fas fa-folder"></i> ${categoryName}</span>
+            <span class="meta-item"><i class="far fa-calendar"></i> ${date}</span>
+            <span class="meta-item"><i class="far fa-clock"></i> ${readTime} 分钟阅读</span>
+            <span class="meta-item"><i class="far fa-eye"></i> ${article.views || 0} 阅读</span>
+        `;
+    }
+
+    // 标签
+    const tagsEl = document.getElementById('articleTagsContainer');
+    console.log('标签元素:', tagsEl, '文章标签:', article.tags);
+    if (tagsEl && article.tags && article.tags.length > 0) {
+        const tagsHtml = article.tags.map(tag =>
+            `<span class="tag">${escapeHtml(tag)}</span>`
+        ).join('');
+        console.log('标签HTML:', tagsHtml);
+        tagsEl.innerHTML = tagsHtml;
+        tagsEl.style.display = 'flex';
+    } else if (tagsEl) {
+        console.log('没有标签数据');
+        tagsEl.style.display = 'none';
+    }
+
+    // 内容
+    const contentEl = document.getElementById('articleContent');
+    if (contentEl) {
+        if (!content) {
+            contentEl.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <p>暂无内容</p>
+                </div>
+            `;
+        } else if (typeof marked !== 'undefined') {
+            contentEl.innerHTML = marked.parse(content);
+            // 代码高亮
+            if (typeof hljs !== 'undefined') {
+                contentEl.querySelectorAll('pre code').forEach(block => {
+                    hljs.highlightElement(block);
+                });
+            }
+        } else {
+            contentEl.innerHTML = content.replace(/\n/g, '<br>');
+        }
+    }
+
+    // 更新阅读量
+    incrementViews(article.id);
+
+    console.log('文章渲染完成');
+}
+
+// 更新阅读量
+function incrementViews(articleId) {
+    const articles = storage.get('blog_articles') || [];
+    const articleIndex = articles.findIndex(a => a.id === articleId);
+
+    if (articleIndex !== -1) {
+        articles[articleIndex].views = (articles[articleIndex].views || 0) + 1;
+        storage.set('blog_articles', articles);
+    }
+}
+
+// 页面加载时获取文章内容
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadArticleContent();
+
+    // 代码高亮初始化
     if (typeof hljs !== 'undefined') {
         hljs.highlightAll();
     }
