@@ -7,11 +7,35 @@ class DataManager {
         this.blogDataFile = 'blog-data.json';
         this.ideasDataFile = 'ideas-data.json';
         this.commentsDataFile = 'comments.json';
+        this.categoriesDataFile = 'categories-data.json';
         this.jsonLoaded = false; // 标记是否成功从JSON加载
+    }
+
+    // 从JSON文件加载分类
+    async loadCategoriesData() {
+        try {
+            const response = await fetch(this.dataPath + this.categoriesDataFile + '?t=' + Date.now());
+            if (!response.ok) {
+                console.warn('无法加载分类数据文件，使用本地存储');
+                return null;
+            }
+            const data = await response.json();
+            if (data && data.length > 0) {
+                console.log('从JSON文件加载分类数据:', data.length, '个分类');
+                storage.set('blog_categories', data);
+                return data;
+            }
+        } catch (error) {
+            console.warn('加载分类数据失败:', error);
+        }
+        return null;
     }
 
     // 从JSON文件加载博客文章
     async loadBlogData() {
+        // 先加载分类
+        await this.loadCategoriesData();
+
         try {
             const response = await fetch(this.dataPath + this.blogDataFile + '?t=' + Date.now()); // 添加时间戳防止缓存
             if (!response.ok) {
@@ -76,6 +100,7 @@ class DataManager {
     exportAllData() {
         const blogData = storage.get('blog_articles') || [];
         const ideasData = storage.get('ideas') || [];
+        const categoriesData = storage.get('blog_categories') || [];
         const commentsData = {
             blog: storage.get('blog_comments') || {},
             ideas: storage.get('idea_comments') || {}
@@ -84,15 +109,24 @@ class DataManager {
         // 创建下载
         this.downloadJSON(blogData, 'blog-data.json', '博客文章数据已导出');
         this.downloadJSON(ideasData, 'ideas-data.json', '奇思妙想数据已导出');
+        this.downloadJSON(categoriesData, 'categories-data.json', '分类数据已导出');
         this.downloadJSON(commentsData, 'comments.json', '评论数据已导出');
 
         return true;
     }
 
-    // 导出博客数据
+    // 导出博客数据（包含分类）
     exportBlogData() {
-        const data = storage.get('blog_articles') || [];
-        this.downloadJSON(data, 'blog-data.json', '博客数据已导出');
+        const articles = storage.get('blog_articles') || [];
+        const categories = storage.get('blog_categories') || [];
+        this.downloadJSON(articles, 'blog-data.json', '博客文章已导出');
+        this.downloadJSON(categories, 'categories-data.json', '分类数据已导出');
+    }
+
+    // 导出分类数据
+    exportCategoriesData() {
+        const data = storage.get('blog_categories') || [];
+        this.downloadJSON(data, 'categories-data.json', '分类数据已导出');
     }
 
     // 导出想法数据
@@ -148,12 +182,17 @@ class DataManager {
                         <button class="export-option-btn" id="exportAllBtn">
                             <i class="fas fa-file-export"></i>
                             <span>导出全部数据</span>
-                            <small>包含文章、想法、评论</small>
+                            <small>文章、分类、想法、评论</small>
                         </button>
                         <button class="export-option-btn" id="exportBlogBtn">
                             <i class="fas fa-newspaper"></i>
                             <span>导出博客文章</span>
                             <small>blog-data.json</small>
+                        </button>
+                        <button class="export-option-btn" id="exportCategoriesBtn">
+                            <i class="fas fa-tags"></i>
+                            <span>导出分类</span>
+                            <small>categories-data.json</small>
                         </button>
                         <button class="export-option-btn" id="exportIdeasBtn">
                             <i class="fas fa-lightbulb"></i>
@@ -172,12 +211,12 @@ class DataManager {
                             <span>博客文章: <strong>${(storage.get('blog_articles') || []).length}</strong> 篇</span>
                         </div>
                         <div class="stat-item">
-                            <i class="fas fa-lightbulb"></i>
-                            <span>奇思妙想: <strong>${(storage.get('ideas') || []).length}</strong> 条</span>
+                            <i class="fas fa-tags"></i>
+                            <span>分类: <strong>${(storage.get('blog_categories') || []).length}</strong> 个</span>
                         </div>
                         <div class="stat-item">
-                            <i class="fas fa-comments"></i>
-                            <span>评论: <strong>${Object.keys(storage.get('idea_comments') || {}).length}</strong> 个想法有评论</span>
+                            <i class="fas fa-lightbulb"></i>
+                            <span>奇思妙想: <strong>${(storage.get('ideas') || []).length}</strong> 条</span>
                         </div>
                     </div>
                 </div>
@@ -197,7 +236,12 @@ class DataManager {
 
         panel.querySelector('#exportBlogBtn').addEventListener('click', () => {
             this.exportBlogData();
-            this.showToast('博客数据已导出');
+            this.showToast('博客文章和分类已导出');
+        });
+
+        panel.querySelector('#exportCategoriesBtn').addEventListener('click', () => {
+            this.exportCategoriesData();
+            this.showToast('分类数据已导出');
         });
 
         panel.querySelector('#exportIdeasBtn').addEventListener('click', () => {

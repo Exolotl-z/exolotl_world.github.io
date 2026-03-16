@@ -1,0 +1,32 @@
+[
+  {
+    "id": "ai",
+    "name": "人工智能",
+    "icon": "fa-robot"
+  },
+  {
+    "id": "other",
+    "name": "其他",
+    "icon": "fa-folder"
+  },
+  {
+    "id": "教程",
+    "name": "教程",
+    "icon": "fa-book"
+  },
+  {
+    "id": "vibe-coding",
+    "name": "vibe coding",
+    "icon": "fa-robot"
+  },
+  {
+    "id": "数据分析",
+    "name": "数据分析",
+    "icon": "fa-code"
+  },
+  {
+    "id": "神经科学",
+    "name": "神经科学",
+    "icon": "fa-folder"
+  }
+]
