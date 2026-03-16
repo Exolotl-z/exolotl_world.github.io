@@ -3,7 +3,7 @@
 class BlogManager {
     constructor() {
         this.articles = [];
-        this.categories = this.getCategories();
+        this.categories = [];
         this.currentCategory = 'all';
         this.searchQuery = '';
         this.pageSize = 10;
@@ -11,17 +11,36 @@ class BlogManager {
         this.init();
     }
 
-    // 获取分类
-    getCategories() {
-        const defaultCategories = [
+    // 获取分类（从JSON文件或本地存储）
+    async loadCategories() {
+        // 尝试从JSON文件加载
+        if (typeof dataManager !== 'undefined') {
+            const jsonCategories = await dataManager.loadCategoriesData();
+            if (jsonCategories && jsonCategories.length > 0) {
+                console.log('使用JSON文件分类数据:', jsonCategories.length, '个分类');
+                return jsonCategories;
+            }
+        }
+
+        // 回退到本地存储
+        const stored = storage.get('blog_categories');
+        if (stored && stored.length > 0) {
+            return stored;
+        }
+
+        // 默认分类
+        return [
             { id: 'frontend', name: '前端开发', icon: 'fa-palette', count: 0 },
             { id: 'backend', name: '后端开发', icon: 'fa-server', count: 0 },
             { id: 'devops', name: 'DevOps', icon: 'fa-cloud', count: 0 },
             { id: 'ai', name: '人工智能', icon: 'fa-robot', count: 0 },
             { id: 'other', name: '其他', icon: 'fa-folder', count: 0 }
         ];
-        const stored = storage.get('blog_categories');
-        return stored || defaultCategories;
+    }
+
+    // 获取分类（同步方法，用于初始化后获取）
+    getCategories() {
+        return this.categories;
     }
 
     // 获取文章（优先从JSON文件加载）
@@ -97,6 +116,9 @@ class BlogManager {
 
     // 初始化
     async init() {
+        // 先加载分类
+        this.categories = await this.loadCategories();
+        // 再加载文章
         this.articles = await this.getArticles();
         this.renderStats();
         this.renderCategories();

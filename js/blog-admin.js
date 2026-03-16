@@ -6,34 +6,66 @@ class BlogAdmin {
     constructor() {
         console.log('BlogAdmin 构造函数开始');
 
-        // 从存储获取数据（添加容错处理）
-        try {
-            // 确保storage可用
-            if (typeof window.storage === 'undefined') {
-                console.warn('storage未定义，创建临时storage');
-                window.storage = {
-                    get: function(key) { return null; },
-                    set: function() { return true; },
-                    remove: function() { return true; }
-                };
-            }
-            this.articles = window.storage.get('blog_articles') || [];
-            this.categories = window.storage.get('blog_categories') || this.getDefaultCategories();
-            console.log('数据加载成功, articles:', this.articles.length);
-        } catch (e) {
-            console.error('初始化数据失败:', e);
-            this.articles = [];
-            this.categories = this.getDefaultCategories();
+        // 确保storage可用
+        if (typeof window.storage === 'undefined') {
+            console.warn('storage未定义，创建临时storage');
+            window.storage = {
+                get: function(key) { return null; },
+                set: function() { return true; },
+                remove: function() { return true; }
+            };
         }
 
+        this.articles = [];
+        this.categories = [];
         this.selectedTags = [];
         this.currentEditId = null;
         this.deleteIds = [];
 
         console.log('BlogAdmin 构造函数完成');
 
-        // 初始化
+        // 异步初始化
         this.init();
+    }
+
+    // 从JSON文件加载分类
+    async loadCategoriesFromJSON() {
+        if (typeof dataManager !== 'undefined') {
+            try {
+                const response = await fetch('data/categories-data.json?t=' + Date.now());
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        console.log('从JSON文件加载分类:', data.length, '个');
+                        storage.set('blog_categories', data);
+                        return data;
+                    }
+                }
+            } catch (e) {
+                console.warn('加载分类JSON失败:', e);
+            }
+        }
+        return null;
+    }
+
+    // 从JSON文件加载文章
+    async loadArticlesFromJSON() {
+        if (typeof dataManager !== 'undefined') {
+            try {
+                const response = await fetch('data/blog-data.json?t=' + Date.now());
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        console.log('从JSON文件加载文章:', data.length, '篇');
+                        storage.set('blog_articles', data);
+                        return data;
+                    }
+                }
+            } catch (e) {
+                console.warn('加载文章JSON失败:', e);
+            }
+        }
+        return null;
     }
 
     getDefaultCategories() {
@@ -54,6 +86,32 @@ class BlogAdmin {
     // 初始化
     async init() {
         console.log('BlogAdmin 开始初始化...');
+
+        try {
+            // 先从JSON文件加载数据
+            const jsonCategories = await this.loadCategoriesFromJSON();
+            const jsonArticles = await this.loadArticlesFromJSON();
+
+            // 设置分类
+            if (jsonCategories) {
+                this.categories = jsonCategories;
+            } else {
+                this.categories = storage.get('blog_categories') || this.getDefaultCategories();
+            }
+
+            // 设置文章
+            if (jsonArticles) {
+                this.articles = jsonArticles;
+            } else {
+                this.articles = storage.get('blog_articles') || [];
+            }
+
+            console.log('数据加载成功, articles:', this.articles.length, 'categories:', this.categories.length);
+        } catch (e) {
+            console.error('加载数据失败:', e);
+            this.articles = storage.get('blog_articles') || [];
+            this.categories = storage.get('blog_categories') || this.getDefaultCategories();
+        }
 
         try {
             // 从IndexedDB加载文章内容
