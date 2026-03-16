@@ -2,11 +2,26 @@
 
 class IdeasManager {
     constructor() {
-        this.ideas = storage.get('ideas') || this.getDefaultIdeas();
+        this.ideas = [];
         this.currentEditId = null;
         this.currentDetailId = null;
         this.likedIdeas = JSON.parse(localStorage.getItem('liked_ideas') || '[]');
         this.init();
+    }
+
+    // 加载数据（优先从JSON文件）
+    async loadIdeas() {
+        // 尝试从JSON文件加载
+        if (typeof dataManager !== 'undefined') {
+            const jsonData = await dataManager.loadIdeasData();
+            if (jsonData && jsonData.length > 0) {
+                console.log('使用JSON文件数据:', jsonData.length, '条想法');
+                return jsonData;
+            }
+        }
+
+        // 回退到localStorage
+        return storage.get('ideas') || this.getDefaultIdeas();
     }
 
     getDefaultIdeas() {
@@ -41,7 +56,8 @@ class IdeasManager {
         ];
     }
 
-    init() {
+    async init() {
+        this.ideas = await this.loadIdeas();
         this.checkAuth();
         this.render();
         this.attachEventListeners();
@@ -299,6 +315,17 @@ class IdeasManager {
     }
 
     // ===== 本地评论系统 =====
+
+    async loadComments() {
+        // 尝试从JSON文件加载
+        if (typeof dataManager !== 'undefined') {
+            const jsonData = await dataManager.loadCommentsData();
+            if (jsonData) {
+                return jsonData;
+            }
+        }
+        return storage.get('idea_comments') || {};
+    }
 
     getComments(ideaId) {
         const allComments = storage.get('idea_comments') || {};

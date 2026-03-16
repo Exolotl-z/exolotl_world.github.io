@@ -112,6 +112,17 @@
                             <p>添加/删除分类</p>
                         </div>
                     </button>
+
+                    <!-- 数据同步 -->
+                    <button class="action-card" id="syncDataBtn" onclick="showExportPanel()">
+                        <div class="action-icon" style="background: #059669;">
+                            <i class="fas fa-sync"></i>
+                        </div>
+                        <div class="action-info">
+                            <h3>数据同步</h3>
+                            <p>导出JSON到GitHub</p>
+                        </div>
+                    </button>
                 </div>
 
                 <!-- 拖拽上传区域 -->
@@ -372,6 +383,7 @@
 
     <script src="js/main.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/data-manager.js"></script>
 
     <!-- 全局函数 - 确保在外部JS加载失败时也能工作 -->
     <script>

@@ -24,8 +24,18 @@ class BlogManager {
         return stored || defaultCategories;
     }
 
-    // 获取文章（从localStorage和IndexedDB）
+    // 获取文章（优先从JSON文件加载）
     async getArticles() {
+        // 尝试从JSON文件加载
+        if (typeof dataManager !== 'undefined') {
+            const jsonData = await dataManager.loadBlogData();
+            if (jsonData && jsonData.length > 0) {
+                console.log('使用JSON文件数据:', jsonData.length, '篇文章');
+                return jsonData.filter(article => article.published !== false);
+            }
+        }
+
+        // 回退到localStorage
         const metadata = storage.get('blog_articles') || [];
         console.log('从存储获取的文章元数据:', metadata);
 
